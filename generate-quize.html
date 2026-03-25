@@ -7,9 +7,8 @@
         body { font-family: monospace; margin: 20px; background: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; }
         .panel { background: white; padding: 20px; margin: 10px 0; border-radius: 5px; }
-        input, textarea, button { padding: 8px; margin: 5px; font-family: monospace; }
-        input { width: 300px; }
-        textarea { width: 100%; height: 80px; }
+        input, button { padding: 8px; margin: 5px; font-family: monospace; }
+        input { width: 200px; }
         button { cursor: pointer; background: #007bff; color: white; border: none; padding: 8px 15px; }
         button:hover { background: #0056b3; }
         .question { border: 1px solid #ddd; margin: 10px 0; padding: 10px; background: #fafafa; }
@@ -17,51 +16,63 @@
         .status { padding: 10px; margin: 10px 0; border-radius: 3px; }
         .success { background: #d4edda; color: #155724; }
         .error { background: #f8d7da; color: #721c24; }
-        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; font-size: 12px; max-height: 400px; }
         hr { margin: 20px 0; }
+        .save-btn { background: #28a745; }
+        .save-btn:hover { background: #218838; }
+        .raw-response { font-size: 11px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="panel">
         <h2>🤖 Admin Quiz Generator</h2>
-        <p><strong>API:</strong> ai.tecresearch.me/ai?q= | <strong>Save:</strong> biologylover.com/api/save/quize</p>
+        <p><strong>AI API:</strong> ai.tecresearch.me | <strong>Save Endpoint:</strong> biologylover.com/api/save/quize</p>
         <hr>
         
         <div>
-            <label><strong>Number of Questions:</strong></label>
-            <input type="number" id="numQuestions" value="3" min="1" max="20">
+            <label><strong>Questions:</strong></label>
+            <input type="number" id="numQuestions" value="3" min="1" max="20" style="width: 60px;">
             
-            <label><strong>Topic/Subject:</strong></label>
+            <label><strong>Topic:</strong></label>
             <input type="text" id="topic" value="JavaScript basics" style="width: 200px;">
             
             <button id="generateBtn">🚀 Generate Quiz</button>
         </div>
         
-        <div id="status" class="status" style="display:none"></div>
+        <div id="status" style="display:none"></div>
     </div>
     
     <div id="quizPanel" class="panel" style="display:none">
-        <h3>📋 Generated Quiz Preview</h3>
+        <h3>📋 Quiz Preview</h3>
         <div id="quizQuestions"></div>
-        <button id="saveBtn" style="background: #28a745;">💾 Save to Database</button>
+        <button id="saveBtn" class="save-btn">💾 Save to Database</button>
     </div>
     
-    <div id="debugPanel" class="panel">
-        <h4>🔧 Debug Info</h4>
-        <pre id="debugLog">Ready...</pre>
+    <div class="panel">
+        <h4>🔧 Debug & Raw Response</h4>
+        <details>
+            <summary>📄 View Raw API Response (click to expand)</summary>
+            <pre id="rawResponseDisplay" style="background:#f0f0f0; max-height:200px;">No response yet</pre>
+        </details>
+        <details>
+            <summary>📝 Debug Log</summary>
+            <pre id="debugLog">Ready...</pre>
+        </details>
     </div>
 </div>
 
 <script>
 // ============================================================
-// SIMPLE QUIZ GENERATOR - FOCUS ON LOGIC
+// QUIZ GENERATOR WITH RESPONSE CLEANER
 // ============================================================
 
 const AI_API = 'https://ai.tecresearch.me/ai?q=';
 const SAVE_API = 'https://biologylover.com/api/save/quize';
 
-let currentQuizJSON = null;  // Store parsed quiz JSON
+let currentQuiz = null;
+let currentTopic = '';
+let currentCount = 0;
 
 function log(msg) {
     const debug = document.getElementById('debugLog');
@@ -73,122 +84,216 @@ function log(msg) {
 function showStatus(msg, isError = false) {
     const statusDiv = document.getElementById('status');
     statusDiv.textContent = msg;
-    statusDiv.className = 'status ' + (isError ? 'error' : 'success');
+    statusDiv.className = isError ? 'error' : 'success';
     statusDiv.style.display = 'block';
     setTimeout(() => statusDiv.style.display = 'none', 5000);
 }
 
 // ============================================================
-// STEP 1: Build PROMPT with STRICT JSON INSTRUCTION
+// CLEAN RESPONSE - REMOVE ANY EXPLANATIONS, GET ONLY JSON
 // ============================================================
-function buildJSONPrompt(numQuestions, topic) {
-    // Template instruction: API MUST return ONLY JSON, no extra text
-    const template = {
-        instruction: "You are a quiz generator. Return ONLY a valid JSON object. No explanations, no markdown, no extra text.",
-        format: {
-            quiz: [
-                {
-                    question: "string",
-                    options: ["option1", "option2", "option3", "option4"],
-                    answer: 0  // index of correct option (0-based)
-                }
-            ]
-        },
-        requirement: `Generate ${numQuestions} multiple choice questions about "${topic}". Each question must have exactly 4 options.`
-    };
+function cleanAndExtractJSON(rawText) {
+    log("Cleaning response - removing explanations...");
     
-    // Convert to string and send as prompt
-    const promptString = JSON.stringify(template);
-    return promptString;
+    let cleaned = rawText.trim();
+    
+    // Display raw for debugging
+    document.getElementById('rawResponseDisplay').textContent = cleaned;
+    
+    // Step 1: Try to find JSON object pattern { ... }
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+        throw new Error("No JSON object found in response");
+    }
+    
+    let jsonStr = jsonMatch[0];
+    log(`Extracted JSON candidate (first 200 chars): ${jsonStr.substring(0, 200)}`);
+    
+    // Step 2: Try to parse the extracted JSON
+    let parsed;
+    try {
+        parsed = JSON.parse(jsonStr);
+        log("✓ Successfully parsed extracted JSON");
+    } catch(e) {
+        log(`✗ First parse failed: ${e.message}`);
+        
+        // Step 3: If it's a string inside, try to extract inner JSON
+        if (typeof parsed === 'string') {
+            try {
+                parsed = JSON.parse(parsed);
+                log("✓ Parsed inner JSON string");
+            } catch(e2) {
+                // Look for nested JSON in result field
+                const innerMatch = jsonStr.match(/"result"\s*:\s*"([\s\S]*?)"/);
+                if (innerMatch) {
+                    let innerStr = innerMatch[1].replace(/\\n/g, '').replace(/\\"/g, '"');
+                    try {
+                        parsed = JSON.parse(innerStr);
+                        log("✓ Extracted and parsed 'result' field JSON");
+                    } catch(e3) {
+                        throw new Error("Cannot extract valid JSON from response");
+                    }
+                } else {
+                    throw new Error("No valid JSON structure found");
+                }
+            }
+        } else {
+            throw e;
+        }
+    }
+    
+    // Step 4: If parsed has result field that's a string, parse it
+    if (parsed.result && typeof parsed.result === 'string') {
+        log("Found 'result' field as string, parsing inner JSON...");
+        try {
+            parsed = JSON.parse(parsed.result);
+            log("✓ Parsed result field successfully");
+        } catch(e) {
+            log(`Failed to parse result field: ${e.message}`);
+        }
+    }
+    
+    return parsed;
 }
 
 // ============================================================
-// STEP 2: Call AI API
+// EXTRACT QUIZ FROM PARSED JSON
 // ============================================================
-async function callAIGenerate(numQuestions, topic) {
-    const prompt = buildJSONPrompt(numQuestions, topic);
-    const fullPrompt = `You are a quiz generator. Return ONLY a valid JSON object with quiz questions, options, and answers. No extra text. Format: {"quiz":[{"question":"...","options":["...","...","...","..."],"answer":0}]}. Generate ${numQuestions} questions about ${topic}.`;
+function extractQuizFromJSON(parsedJson) {
+    log("Extracting quiz array from parsed JSON...");
     
-    const encodedPrompt = encodeURIComponent(fullPrompt);
-    const url = AI_API + encodedPrompt;
+    let quizArray = null;
     
-    log(`Calling API: ${url.substring(0, 150)}...`);
-    
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const rawText = await response.text();
-        log(`Raw API response length: ${rawText.length} chars`);
-        log(`Raw response: ${rawText.substring(0, 500)}`);
-        
-        // Parse JSON from response
-        let parsed = null;
-        try {
-            parsed = JSON.parse(rawText);
-            log(`✓ Successfully parsed JSON`);
-        } catch (e) {
-            log(`✗ Failed to parse JSON: ${e.message}`);
-            
-            // Try to extract JSON if there's extra text
-            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                try {
-                    parsed = JSON.parse(jsonMatch[0]);
-                    log(`✓ Extracted and parsed JSON from response`);
-                } catch(e2) {
-                    throw new Error(`Cannot parse JSON from API response`);
-                }
-            } else {
-                throw new Error(`API did not return valid JSON`);
-            }
-        }
-        
-        // Check if parsed has quiz array
-        let quizArray = null;
-        if (parsed.quiz && Array.isArray(parsed.quiz)) {
-            quizArray = parsed.quiz;
-        } else if (Array.isArray(parsed)) {
-            quizArray = parsed;
-        } else if (parsed.questions && Array.isArray(parsed.questions)) {
-            quizArray = parsed.questions;
-        } else {
-            // Try to create quiz from any array found
-            for (let key in parsed) {
-                if (Array.isArray(parsed[key]) && parsed[key].length > 0 && parsed[key][0].question) {
-                    quizArray = parsed[key];
+    // Try different possible structures
+    if (parsedJson.quiz && Array.isArray(parsedJson.quiz)) {
+        quizArray = parsedJson.quiz;
+        log(`✓ Found quiz array with ${quizArray.length} questions`);
+    } 
+    else if (Array.isArray(parsedJson)) {
+        quizArray = parsedJson;
+        log(`✓ Found direct array with ${quizArray.length} items`);
+    }
+    else if (parsedJson.questions && Array.isArray(parsedJson.questions)) {
+        quizArray = parsedJson.questions;
+        log(`✓ Found questions array with ${quizArray.length} items`);
+    }
+    else {
+        // Search for any array property that contains questions
+        for (let key in parsedJson) {
+            if (Array.isArray(parsedJson[key]) && parsedJson[key].length > 0) {
+                const firstItem = parsedJson[key][0];
+                if (firstItem && (firstItem.question || firstItem.options)) {
+                    quizArray = parsedJson[key];
+                    log(`✓ Found quiz array in property '${key}' with ${quizArray.length} items`);
                     break;
                 }
             }
         }
+    }
+    
+    if (!quizArray || quizArray.length === 0) {
+        throw new Error("No quiz questions found in cleaned JSON");
+    }
+    
+    // Normalize each question
+    const normalized = quizArray.map((q, idx) => {
+        let questionText = q.question || q.text || q.q || `Question ${idx + 1}`;
+        let options = q.options || q.choices || q.answers || ["Option A", "Option B", "Option C", "Option D"];
         
-        if (!quizArray || quizArray.length === 0) {
-            throw new Error(`No quiz questions found in API response`);
+        // Find correct answer index
+        let correctIndex = -1;
+        
+        if (q.correct_answer !== undefined) {
+            if (typeof q.correct_answer === 'number') {
+                correctIndex = q.correct_answer;
+            } else if (typeof q.correct_answer === 'string') {
+                // Try to find by text
+                correctIndex = options.findIndex(opt => opt === q.correct_answer);
+                if (correctIndex === -1) {
+                    // Try case-insensitive
+                    correctIndex = options.findIndex(opt => 
+                        opt.toLowerCase() === q.correct_answer.toLowerCase()
+                    );
+                }
+                // Try letter match
+                if (correctIndex === -1 && q.correct_answer.match(/^[A-D]$/i)) {
+                    correctIndex = q.correct_answer.toUpperCase().charCodeAt(0) - 65;
+                }
+            }
+        } else if (q.answer !== undefined) {
+            if (typeof q.answer === 'number') {
+                correctIndex = q.answer;
+            } else if (typeof q.answer === 'string') {
+                correctIndex = options.findIndex(opt => opt === q.answer);
+                if (correctIndex === -1 && q.answer.match(/^[A-D]$/i)) {
+                    correctIndex = q.answer.toUpperCase().charCodeAt(0) - 65;
+                }
+            }
+        } else if (q.correct !== undefined) {
+            correctIndex = typeof q.correct === 'number' ? q.correct : 0;
         }
         
-        // Validate each question
-        quizArray.forEach((q, idx) => {
-            if (!q.question) q.question = `Question ${idx + 1}`;
-            if (!q.options || q.options.length < 2) q.options = ["Option A", "Option B", "Option C", "Option D"];
-            if (q.answer === undefined || q.answer === null) q.answer = 0;
-            if (typeof q.answer === 'string') {
-                // Convert letter to index
-                const letter = q.answer.toUpperCase();
-                if (letter >= 'A' && letter <= 'D') q.answer = letter.charCodeAt(0) - 65;
-                else q.answer = 0;
-            }
-        });
+        if (correctIndex === -1) correctIndex = 0;
         
-        return quizArray;
-        
-    } catch (error) {
-        log(`✗ Error: ${error.message}`);
-        throw error;
-    }
+        return {
+            question: questionText,
+            options: options,
+            answer: correctIndex
+        };
+    });
+    
+    log(`✓ Normalized ${normalized.length} questions`);
+    return normalized;
 }
 
 // ============================================================
-// STEP 3: Display Quiz
+// BUILD PROMPT - STRICT JSON INSTRUCTION
+// ============================================================
+function buildPrompt(numQuestions, topic) {
+    return `Generate ${numQuestions} multiple choice questions about ${topic}. 
+CRITICAL INSTRUCTIONS:
+1. Return ONLY a valid JSON object
+2. NO explanations, NO markdown, NO additional text
+3. Use this exact structure:
+{
+  "quiz": [
+    {
+      "question": "question text",
+      "options": ["option1", "option2", "option3", "option4"],
+      "correct_answer": "exact text of correct option"
+    }
+  ]
+}
+Start your response with { and end with }. Do not add any text before or after.`;
+}
+
+// ============================================================
+// CALL AI API WITH CLEANING
+// ============================================================
+async function callAIGenerate(numQuestions, topic) {
+    const prompt = buildPrompt(numQuestions, topic);
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = AI_API + encodedPrompt;
+    
+    log(`Calling API with prompt length: ${prompt.length} chars`);
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const rawText = await response.text();
+    log(`Raw response length: ${rawText.length} chars`);
+    
+    // Clean and extract JSON
+    const cleanedJson = cleanAndExtractJSON(rawText);
+    log(`Cleaned JSON type: ${typeof cleanedJson}`);
+    
+    // Extract quiz array
+    const quiz = extractQuizFromJSON(cleanedJson);
+    return quiz;
+}
+
+// ============================================================
+// DISPLAY QUIZ
 // ============================================================
 function displayQuiz(quizArray) {
     const container = document.getElementById('quizQuestions');
@@ -198,7 +303,8 @@ function displayQuiz(quizArray) {
         const div = document.createElement('div');
         div.className = 'question';
         
-        const correctOption = q.options[q.answer] || q.options[0];
+        const correctLetter = String.fromCharCode(65 + q.answer);
+        const correctText = q.options[q.answer];
         
         div.innerHTML = `
             <strong>Q${idx + 1}: ${escapeHtml(q.question)}</strong><br>
@@ -209,7 +315,7 @@ function displayQuiz(quizArray) {
                     ${prefix}) ${escapeHtml(opt)} ${isCorrect ? '✓' : ''}
                 </div>`;
             }).join('')}
-            <div class="correct">📌 Correct Answer: ${String.fromCharCode(65 + q.answer)}</div>
+            <div class="correct">✅ Correct Answer: ${correctLetter}) ${escapeHtml(correctText)}</div>
         `;
         container.appendChild(div);
     });
@@ -218,12 +324,11 @@ function displayQuiz(quizArray) {
 }
 
 // ============================================================
-// STEP 4: Save to Database
+// SAVE TO DATABASE
 // ============================================================
 async function saveToDatabase(quizArray, topic, numQuestions) {
-    // Build the JSON object to send
     const saveObject = {
-        quizId: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        quizId: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
         topic: topic,
         totalQuestions: numQuestions,
         generatedAt: new Date().toISOString(),
@@ -237,11 +342,11 @@ async function saveToDatabase(quizArray, topic, numQuestions) {
         metadata: {
             source: "ai.tecresearch.me",
             generator: "Admin Dashboard",
-            userAgent: navigator.userAgent
+            timestamp: new Date().toISOString()
         }
     };
     
-    log(`Saving to ${SAVE_API}: ${JSON.stringify(saveObject, null, 2)}`);
+    log(`Saving to ${SAVE_API}...`);
     
     try {
         const response = await fetch(SAVE_API, {
@@ -252,24 +357,24 @@ async function saveToDatabase(quizArray, topic, numQuestions) {
         
         if (response.ok) {
             const result = await response.json();
-            log(`✓ Save successful: ${JSON.stringify(result)}`);
+            log(`✓ Save successful`);
             showStatus(`✅ Quiz saved! ID: ${saveObject.quizId}`, false);
         } else if (response.status === 404) {
-            log(`⚠️ Save endpoint not found (404) - Data logged to console`);
-            showStatus(`⚠️ Save endpoint not ready. Quiz data logged to console.`, true);
-            console.log('📦 QUIZ DATA (ready to save):', saveObject);
+            log(`⚠️ Save endpoint not found (404)`);
+            showStatus(`⚠️ Save endpoint not ready. Quiz data in console.`, true);
+            console.log('📦 QUIZ DATA READY FOR SAVE:', saveObject);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }
     } catch (error) {
         log(`✗ Save failed: ${error.message}`);
-        showStatus(`❌ Save failed: ${error.message}. Check console.`, true);
+        showStatus(`❌ Save failed: ${error.message}`, true);
         console.log('📦 QUIZ DATA (would save):', saveObject);
     }
 }
 
 // ============================================================
-// STEP 5: Main Flow
+// MAIN FLOW
 // ============================================================
 async function generateAndDisplay() {
     const numQuestions = parseInt(document.getElementById('numQuestions').value);
@@ -280,19 +385,22 @@ async function generateAndDisplay() {
         return;
     }
     
+    currentTopic = topic;
+    currentCount = numQuestions;
+    
     const generateBtn = document.getElementById('generateBtn');
     generateBtn.disabled = true;
     generateBtn.textContent = '⏳ Generating...';
     
     showStatus(`Generating ${numQuestions} questions about "${topic}"...`, false);
-    log(`Starting quiz generation: ${numQuestions} questions on "${topic}"`);
+    log(`=== Starting generation ===`);
     
     try {
         const quizArray = await callAIGenerate(numQuestions, topic);
-        log(`✓ Generated ${quizArray.length} questions successfully`);
+        log(`✓ Successfully generated ${quizArray.length} questions`);
         
         displayQuiz(quizArray);
-        currentQuizJSON = quizArray;
+        currentQuiz = quizArray;
         
         showStatus(`✅ Generated ${quizArray.length} questions!`, false);
         
@@ -301,12 +409,12 @@ async function generateAndDisplay() {
         const newSaveBtn = saveBtn.cloneNode(true);
         saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
         newSaveBtn.addEventListener('click', () => {
-            saveToDatabase(currentQuizJSON, topic, numQuestions);
+            saveToDatabase(currentQuiz, currentTopic, currentCount);
         });
         
     } catch (error) {
         log(`✗ Generation failed: ${error.message}`);
-        showStatus(`❌ Error: ${error.message}. Check debug panel.`, true);
+        showStatus(`❌ Error: ${error.message}`, true);
         document.getElementById('quizPanel').style.display = 'none';
     } finally {
         generateBtn.disabled = false;
@@ -327,7 +435,7 @@ function escapeHtml(str) {
 // Event listeners
 document.getElementById('generateBtn').addEventListener('click', generateAndDisplay);
 
-log('Admin Quiz Generator Ready');
+log('Admin Quiz Generator Ready - with Response Cleaner');
 log(`AI API: ${AI_API}`);
 log(`Save API: ${SAVE_API}`);
 </script>
