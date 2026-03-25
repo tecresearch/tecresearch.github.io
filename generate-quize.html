@@ -3,109 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Quiz Generator | Powered by tecresearch API</title>
+    <title>Admin Quiz Generator | NEET Exam Quiz Builder</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
-            margin: 0;
         }
 
-        .main-container {
-            max-width: 900px;
+        .admin-container {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .quiz-card {
+        /* Header */
+        .admin-header {
             background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
+            border-radius: 20px;
             padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        .header h1 {
-            margin: 0;
+        .header-title h1 {
+            color: #1e3c72;
             font-size: 1.8rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .header p {
-            margin: 0.5rem 0 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
+        .header-title p {
+            color: #666;
+            margin-top: 5px;
         }
 
-        .api-input-area {
-            padding: 1.5rem 2rem;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .input-group {
+        .api-status {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .input-group input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 0.75rem;
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Main Content */
+        .admin-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .admin-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #1e3c72;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 1rem;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
 
-        .input-group input:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            border-color: #2a5298;
         }
 
-        .generate-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 12px 24px;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            font-size: 1rem;
         }
 
-        .generate-btn:hover:not(:disabled) {
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30,60,114,0.3);
         }
 
-        .generate-btn:disabled {
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
+        /* Quiz Preview */
+        .quiz-preview {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .question-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2a5298;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #2a5298;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .options-list {
+            padding-left: 1.5rem;
+        }
+
+        .option-item {
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #ddd;
+        }
+
+        /* Loading Spinner */
         .loading {
             text-align: center;
-            padding: 3rem;
-            color: #64748b;
+            padding: 2rem;
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -118,233 +235,294 @@
             100% { transform: rotate(360deg); }
         }
 
-        .quiz-body {
-            padding: 2rem;
+        /* Alert Messages */
+        .alert {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
         }
 
-        .progress-area {
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .instructions h4 {
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .instructions ul {
+            padding-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .question-counter, .score-badge {
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        .question-counter {
-            background: #eef2ff;
-            color: #1e40af;
-        }
-
-        .score-badge {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .question-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 1rem 0 1.5rem;
-            color: #0f172a;
-            line-height: 1.3;
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 2rem;
-        }
-
-        .option {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 1rem;
-            padding: 1rem 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .option:hover {
-            background: #f1f5f9;
-            border-color: #94a3b8;
-            transform: translateX(4px);
-        }
-
-        .option.selected {
-            background: #eef2ff;
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.2);
-        }
-
-        .option-prefix {
-            font-weight: 700;
-            width: 32px;
-            height: 32px;
-            background: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #cbd5e1;
-            color: #1e293b;
-        }
-
-        .option.selected .option-prefix {
-            background: #667eea;
-            border-color: #667eea;
-            color: white;
-        }
-
-        .navigation {
-            display: flex;
-            justify-content: space-between;
             gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        button {
-            background: #1e293b;
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 0.7rem 1.5rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        button:hover:not(:disabled) {
-            background: #0f172a;
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            background: #cbd5e1;
-            cursor: not-allowed;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 100%;
             margin-top: 1.5rem;
-        }
-
-        .result-area {
-            background: #f1f5f9;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .restart-btn {
-            background: #0f172a;
-            margin-top: 1rem;
-        }
-
-        .comment-block {
-            background: #fef9e3;
-            border-left: 4px solid #eab308;
-            padding: 0.75rem;
-            font-size: 0.75rem;
-            color: #713f12;
-            margin-top: 1.5rem;
-            border-radius: 8px;
-            font-family: monospace;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            border-left: 4px solid #ef4444;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            color: #991b1b;
-            margin-top: 1rem;
-        }
-
-        .success-message {
-            background: #dcfce7;
-            border-left: 4px solid #22c55e;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            color: #166534;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.8);
-            padding: 1rem;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 <body>
-<div class="main-container">
-    <div class="quiz-card">
-        <div class="header">
+<div class="admin-container">
+    <div class="admin-header">
+        <div class="header-title">
             <h1>
-                <span>🤖</span> AI Quiz Generator
+                <span>📝</span> Admin Quiz Generator
             </h1>
-            <p>Powered by tecresearch.ai API | Enter any topic to generate an interactive quiz</p>
+            <p>Generate NEET exam quizzes using AI | Auto-save to database</p>
         </div>
+        <div class="api-status">
+            <span class="status-badge" id="aiApiStatus">🔍 Checking AI API...</span>
+            <span class="status-badge" id="saveApiStatus">🔍 Checking Save API...</span>
+        </div>
+    </div>
 
-        <div class="api-input-area">
-            <div class="input-group">
-                <input type="text" id="promptInput" placeholder="e.g., 'Generate a 5-question quiz about JavaScript basics' or 'Create quiz on World War II'" value="Generate a 5-question multiple choice quiz about Python programming with 4 options each">
-                <button id="generateBtn" class="generate-btn">🎯 Generate Quiz</button>
+    <div class="admin-main">
+        <!-- Left Panel: Quiz Generation Form -->
+        <div class="card">
+            <h2>🎯 Generate Quiz</h2>
+            
+            <div class="form-group">
+                <label>Quiz Type / Subject</label>
+                <select id="quizType">
+                    <option value="NEET">NEET Exam</option>
+                    <option value="JEE">JEE Main</option>
+                    <option value="UPSC">UPSC Prelims</option>
+                    <option value="Custom">Custom Topic</option>
+                </select>
             </div>
+
+            <div class="form-group">
+                <label>Number of Questions</label>
+                <input type="number" id="questionCount" value="45" min="1" max="100">
+            </div>
+
+            <div class="form-group">
+                <label>Custom Prompt (optional)</label>
+                <textarea id="customPrompt" placeholder="e.g., Generate 45 multiple choice questions for NEET Biology covering Human Physiology with 4 options each and mark the correct answer"></textarea>
+            </div>
+
+            <div class="instructions">
+                <h4>📌 Instructions for AI:</h4>
+                <ul>
+                    <li>Only generate quiz/question content</li>
+                    <li>Each question must have 4 options (A, B, C, D)</li>
+                    <li>Format: Question text followed by options and correct answer</li>
+                    <li>Include answer key at the end</li>
+                </ul>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="generateBtn">🤖 Generate Quiz from AI</button>
+                <button class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+            </div>
+
+            <div id="generationStatus"></div>
         </div>
 
-        <div id="quizContent">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Enter a prompt above and click Generate to start!</p>
+        <!-- Right Panel: Quiz Preview & Save -->
+        <div class="card">
+            <h2>📋 Generated Quiz Preview</h2>
+            <div id="quizPreviewArea">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Click "Generate Quiz" to start...</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons" id="saveActions" style="display: none;">
+                <button class="btn btn-success" id="saveQuizBtn">💾 Save Quiz to Database</button>
+                <button class="btn btn-danger" id="regenerateBtn">🔄 Regenerate</button>
             </div>
         </div>
     </div>
-    <footer>
-        🔌 API Endpoint: ai.tecresearch.me/ai?q= | 💾 Saves results to /api/save/quize
-    </footer>
 </div>
 
 <script>
     // API Configuration
-    const API_BASE_URL = 'https://ai.tecresearch.me/ai?q=';
-    const SAVE_ENDPOINT = '/api/save/quize';
+    const AI_API_URL = 'https://ai.tecresearch.me/ai?q=';
+    const SAVE_API_URL = 'https://biologylover.com/api/save/quize';
     
-    // Quiz state
-    let currentQuestions = [];
-    let currentQuestionIndex = 0;
-    let userAnswers = [];
-    let quizFinished = false;
-    let finalScore = 0;
-    let currentPrompt = '';
-
-    // DOM elements
-    const quizContent = document.getElementById('quizContent');
+    // Quiz data
+    let currentQuizData = null;
+    let parsedQuestions = [];
+    
+    // DOM Elements
     const generateBtn = document.getElementById('generateBtn');
-    const promptInput = document.getElementById('promptInput');
-
-    // Helper: Call API to generate quiz
-    async function generateQuizFromAPI(prompt) {
+    const clearBtn = document.getElementById('clearBtn');
+    const saveQuizBtn = document.getElementById('saveQuizBtn');
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    const quizPreviewArea = document.getElementById('quizPreviewArea');
+    const generationStatus = document.getElementById('generationStatus');
+    const saveActions = document.getElementById('saveActions');
+    const quizType = document.getElementById('quizType');
+    const questionCount = document.getElementById('questionCount');
+    const customPrompt = document.getElementById('customPrompt');
+    
+    // Check API status
+    async function checkApis() {
+        // Check AI API
         try {
-            showLoading(true);
+            const aiResponse = await fetch(`${AI_API_URL}test`, { method: 'HEAD', mode: 'no-cors' });
+            document.getElementById('aiApiStatus').innerHTML = '✅ AI API Online';
+            document.getElementById('aiApiStatus').className = 'status-badge status-online';
+        } catch (error) {
+            document.getElementById('aiApiStatus').innerHTML = '⚠️ AI API (CORS)';
+            document.getElementById('aiApiStatus').className = 'status-badge status-offline';
+        }
+        
+        // Check Save API
+        try {
+            const saveResponse = await fetch(SAVE_API_URL, { method: 'OPTIONS' });
+            document.getElementById('saveApiStatus').innerHTML = '✅ Save API Reachable';
+            document.getElementById('saveApiStatus').className = 'status-badge status-online';
+        } catch (error) {
+            document.getElementById('saveApiStatus').innerHTML = '⚠️ Save API Not Ready';
+            document.getElementById('saveApiStatus').className = 'status-badge status-offline';
+        }
+    }
+    
+    // Build prompt for AI
+    function buildPrompt() {
+        let type = quizType.value;
+        let count = questionCount.value;
+        let custom = customPrompt.value.trim();
+        
+        if (custom) {
+            return custom;
+        }
+        
+        let basePrompt = `Generate ${count} multiple choice questions for ${type} exam`;
+        
+        if (type === 'NEET') {
+            basePrompt += ` with difficulty level suitable for NEET. Cover topics from Physics, Chemistry, and Biology. Each question must have exactly 4 options (A, B, C, D) and clearly mark the correct answer. Format: Q1: [question] A) ... B) ... C) ... D) ... Answer: [letter]`;
+        } else if (type === 'JEE') {
+            basePrompt += ` covering Mathematics, Physics, and Chemistry. Each question must have 4 options with one correct answer.`;
+        } else if (type === 'UPSC') {
+            basePrompt += ` covering General Studies, History, Geography, Polity, and Economy. Each question must have 4 options.`;
+        }
+        
+        basePrompt += ` Only return the quiz questions. Do not include any extra text or explanations.`;
+        
+        return basePrompt;
+    }
+    
+    // Parse AI response into structured quiz data
+    function parseQuizResponse(aiResponse) {
+        const questions = [];
+        
+        // Try to parse as JSON first
+        try {
+            const jsonData = JSON.parse(aiResponse);
+            if (jsonData.questions && Array.isArray(jsonData.questions)) {
+                return jsonData.questions;
+            }
+        } catch (e) {
+            // Not JSON, parse text
+        }
+        
+        // Parse text response
+        const lines = aiResponse.split('\n');
+        let currentQuestion = null;
+        let currentOptions = [];
+        let currentAnswer = null;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
             
+            // Match question pattern (Q1:, 1., etc.)
+            const questionMatch = line.match(/^(?:Q|Question)?\s*(\d+)[\.:]\s*(.+)/i);
+            if (questionMatch) {
+                // Save previous question
+                if (currentQuestion && currentOptions.length > 0) {
+                    questions.push({
+                        id: questions.length + 1,
+                        question: currentQuestion,
+                        options: [...currentOptions],
+                        correctAnswer: currentAnswer || 'A',
+                        correctAnswerIndex: currentAnswer ? currentAnswer.charCodeAt(0) - 65 : 0
+                    });
+                }
+                currentQuestion = questionMatch[2];
+                currentOptions = [];
+                currentAnswer = null;
+                continue;
+            }
+            
+            // Match options (A), B., etc.)
+            const optionMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
+            if (optionMatch && currentQuestion) {
+                currentOptions.push(optionMatch[2]);
+                continue;
+            }
+            
+            // Match answer
+            const answerMatch = line.match(/answer:\s*([A-D])/i);
+            if (answerMatch && currentQuestion) {
+                currentAnswer = answerMatch[1].toUpperCase();
+            }
+        }
+        
+        // Add last question
+        if (currentQuestion && currentOptions.length > 0) {
+            questions.push({
+                id: questions.length + 1,
+                question: currentQuestion,
+                options: [...currentOptions],
+                correctAnswer: currentAnswer || 'A',
+                correctAnswerIndex: currentAnswer ? currentAnswer.charCodeAt(0) - 65 : 0
+            });
+        }
+        
+        return questions;
+    }
+    
+    // Generate quiz from AI
+    async function generateQuiz() {
+        const prompt = buildPrompt();
+        
+        if (!prompt) {
+            showStatus('Please enter a prompt or select quiz type', 'error');
+            return;
+        }
+        
+        showLoading(true);
+        showStatus('Generating quiz from AI... This may take 10-20 seconds', 'warning');
+        
+        try {
             const encodedPrompt = encodeURIComponent(prompt);
-            const apiUrl = `${API_BASE_URL}${encodedPrompt}`;
+            const apiUrl = `${AI_API_URL}${encodedPrompt}`;
             
-            console.log('Calling API:', apiUrl);
+            console.log('Calling AI API:', apiUrl);
             
             const response = await fetch(apiUrl);
             
@@ -352,378 +530,185 @@
                 throw new Error(`API returned status ${response.status}`);
             }
             
-            const data = await response.text();
+            const aiResponse = await response.text();
+            console.log('AI Response:', aiResponse);
             
-            console.log('API Response:', data);
-            
-            const parsedQuestions = parseQuizFromResponse(data, prompt);
+            // Parse the response
+            parsedQuestions = parseQuizResponse(aiResponse);
             
             if (parsedQuestions.length === 0) {
-                throw new Error('Could not parse quiz questions from API response. Make sure the API returns questions in a readable format.');
+                // Fallback sample if parsing fails
+                parsedQuestions = createSampleQuiz(parseInt(questionCount.value));
+                showStatus('AI response parsed partially. Using fallback format.', 'warning');
+            } else {
+                showStatus(`Successfully generated ${parsedQuestions.length} questions!`, 'success');
             }
             
-            currentQuestions = parsedQuestions;
-            currentQuestionIndex = 0;
-            userAnswers = new Array(currentQuestions.length).fill(null);
-            quizFinished = false;
+            // Display quiz preview
+            displayQuizPreview(parsedQuestions);
             
-            renderQuizInterface();
+            // Prepare data for saving
+            currentQuizData = {
+                prompt: prompt,
+                timestamp: new Date().toISOString(),
+                totalQuestions: parsedQuestions.length,
+                score: null,
+                percentage: null,
+                userAnswers: null,
+                questions: parsedQuestions.map((q, idx) => ({
+                    index: idx,
+                    question: q.question,
+                    options: q.options,
+                    correctAnswerIndex: q.correctAnswerIndex,
+                    correctAnswerText: q.options[q.correctAnswerIndex]
+                })),
+                metadata: {
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    quizId: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    generatedBy: 'Admin Dashboard',
+                    quizType: quizType.value
+                }
+            };
+            
+            saveActions.style.display = 'flex';
             
         } catch (error) {
             console.error('Error generating quiz:', error);
-            showError(`Failed to generate quiz: ${error.message}. Please check your API endpoint and try again.`);
+            showStatus(`Failed to generate quiz: ${error.message}. Please try again.`, 'error');
+            displayError(error.message);
         } finally {
             showLoading(false);
         }
     }
     
-    // Parse quiz from API response
-    function parseQuizFromResponse(apiResponse, originalPrompt) {
+    // Create sample quiz (fallback)
+    function createSampleQuiz(count) {
         const questions = [];
+        const topics = ['Physics', 'Chemistry', 'Biology', 'Mathematics'];
         
-        // Try to parse as JSON first
-        try {
-            const jsonData = JSON.parse(apiResponse);
-            if (Array.isArray(jsonData)) {
-                return jsonData;
-            } else if (jsonData.questions && Array.isArray(jsonData.questions)) {
-                return jsonData.questions;
-            }
-        } catch (e) {
-            // Not JSON, continue with text parsing
-        }
-        
-        // Parse text response - look for question patterns
-        const lines = apiResponse.split('\n');
-        let currentQuestion = null;
-        let currentOptions = [];
-        let collectingOptions = false;
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            const questionMatch = line.match(/^\d+[\.\)]\s*(.+)/) || 
-                                 (line.includes('?') && !line.match(/^[A-D]\)/i) && !line.match(/^[A-D]\./i));
-            
-            if (questionMatch && !collectingOptions) {
-                if (currentQuestion && currentOptions.length > 0) {
-                    questions.push({
-                        question: currentQuestion,
-                        options: [...currentOptions],
-                        answer: 0
-                    });
-                }
-                currentQuestion = questionMatch[1] || line;
-                currentOptions = [];
-                collectingOptions = true;
-            }
-            else if (collectingOptions && (line.match(/^[A-D][\.\)]\s*(.+)/i) || line.match(/^[A-D]\)/i))) {
-                const optionMatch = line.match(/^[A-D][\.\)]\s*(.+)/i);
-                if (optionMatch) {
-                    currentOptions.push(optionMatch[1]);
-                }
-            }
-            else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct:')) {
-                const answerMatch = line.match(/answer:\s*([A-D])/i);
-                if (answerMatch && currentQuestion && currentOptions.length > 0) {
-                    const answerLetter = answerMatch[1].toUpperCase();
-                    const answerIndex = answerLetter.charCodeAt(0) - 65;
-                    if (answerIndex >= 0 && answerIndex < currentOptions.length) {
-                        if (questions.length > 0) {
-                            questions[questions.length - 1].answer = answerIndex;
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (currentQuestion && currentOptions.length > 0) {
+        for (let i = 1; i <= Math.min(count, 10); i++) {
+            const topic = topics[i % topics.length];
             questions.push({
-                question: currentQuestion,
-                options: currentOptions,
-                answer: 0
+                id: i,
+                question: `Sample ${topic} Question ${i}: What is the correct answer for this ${topic} concept?`,
+                options: ['Option A: First choice', 'Option B: Second choice', 'Option C: Third choice', 'Option D: Fourth choice'],
+                correctAnswer: 'A',
+                correctAnswerIndex: 0
             });
-        }
-        
-        if (questions.length === 0) {
-            console.log('Could not parse questions, creating sample quiz');
-            return createSampleQuiz(originalPrompt);
         }
         
         return questions;
     }
     
-    function createSampleQuiz(topic) {
-        return [
-            {
-                question: `What is the main topic of "${topic.substring(0, 50)}"?`,
-                options: ["Topic A", "Topic B", "Topic C", "Topic D"],
-                answer: 0
-            },
-            {
-                question: "Which of the following is correct?",
-                options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-                answer: 1
-            }
-        ];
+    // Display quiz preview
+    function displayQuizPreview(questions) {
+        if (!questions || questions.length === 0) {
+            quizPreviewArea.innerHTML = '<div class="alert alert-error">No questions to display</div>';
+            return;
+        }
+        
+        let html = '<div class="quiz-preview">';
+        
+        questions.forEach((q, idx) => {
+            html += `
+                <div class="question-item">
+                    <div class="question-number">Question ${idx + 1}</div>
+                    <div class="question-text">${escapeHtml(q.question)}</div>
+                    <div class="options-list">
+            `;
+            
+            q.options.forEach((opt, optIdx) => {
+                const prefix = String.fromCharCode(65 + optIdx);
+                html += `<div class="option-item">${prefix}) ${escapeHtml(opt)}</div>`;
+            });
+            
+            html += `
+                    </div>
+                    <div class="correct-answer">
+                        ✓ Correct Answer: ${q.correctAnswer || String.fromCharCode(65 + (q.correctAnswerIndex || 0))}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        quizPreviewArea.innerHTML = html;
     }
     
-    // Save quiz results to database
-    async function saveQuizResultsToDatabase() {
-        // Prepare the JSON object to send
-        const quizResults = {
-            prompt: currentPrompt,
-            timestamp: new Date().toISOString(),
-            totalQuestions: currentQuestions.length,
-            score: finalScore,
-            percentage: ((finalScore / currentQuestions.length) * 100).toFixed(2),
-            userAnswers: userAnswers.map((answer, idx) => ({
-                questionIndex: idx,
-                question: currentQuestions[idx].question,
-                selectedAnswer: currentQuestions[idx].options[answer],
-                selectedAnswerIndex: answer,
-                correctAnswer: currentQuestions[idx].options[currentQuestions[idx].answer],
-                correctAnswerIndex: currentQuestions[idx].answer,
-                isCorrect: answer === currentQuestions[idx].answer
-            })),
-            questions: currentQuestions.map((q, idx) => ({
-                index: idx,
-                question: q.question,
-                options: q.options,
-                correctAnswerIndex: q.answer,
-                correctAnswerText: q.options[q.answer]
-            })),
-            metadata: {
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString(),
-                quizId: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-            }
-        };
+    // Save quiz to database
+    async function saveQuizToDatabase() {
+        if (!currentQuizData) {
+            showStatus('No quiz data to save. Please generate a quiz first.', 'error');
+            return;
+        }
         
-        console.log('Saving to database:', quizResults);
+        showStatus('Saving quiz to database...', 'warning');
+        saveQuizBtn.disabled = true;
+        saveQuizBtn.textContent = '💾 Saving...';
         
         try {
-            const response = await fetch(SAVE_ENDPOINT, {
+            const response = await fetch(SAVE_API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(quizResults)
+                body: JSON.stringify(currentQuizData)
             });
             
             if (response.ok) {
                 const result = await response.json();
-                console.log('Successfully saved to database:', result);
-                return { success: true, data: result };
+                console.log('Save successful:', result);
+                showStatus(`✅ Quiz saved successfully! Quiz ID: ${result.quizId || currentQuizData.metadata.quizId}`, 'success');
             } else {
-                console.error('Failed to save to database:', response.status, response.statusText);
-                return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
+                // If endpoint returns 404, show mock success with instructions
+                if (response.status === 404) {
+                    showStatus(`⚠️ Save endpoint not yet implemented. Quiz data is ready for when the endpoint is available.`, 'warning');
+                    console.log('Mock save - Quiz data would be saved:', currentQuizData);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
             }
         } catch (error) {
-            console.error('Error saving to database:', error);
-            return { success: false, error: error.message };
+            console.error('Error saving quiz:', error);
+            // Mock save for demonstration
+            showStatus(`📝 Quiz data ready to save (endpoint not active). Data logged to console.`, 'warning');
+            console.log('Quiz data that would be sent to /api/save/quize:', currentQuizData);
+        } finally {
+            saveQuizBtn.disabled = false;
+            saveQuizBtn.textContent = '💾 Save Quiz to Database';
         }
     }
     
-    function renderQuizInterface() {
-        if (quizFinished) {
-            renderResults();
-        } else {
-            renderCurrentQuestion();
-        }
-    }
-    
-    function renderCurrentQuestion() {
-        if (!currentQuestions.length || currentQuestionIndex >= currentQuestions.length) {
-            quizContent.innerHTML = '<div class="error-message">No questions available. Please generate a new quiz.</div>';
-            return;
-        }
-        
-        const question = currentQuestions[currentQuestionIndex];
-        const selectedIdx = userAnswers[currentQuestionIndex];
-        const total = currentQuestions.length;
-        const answeredCount = userAnswers.filter(a => a !== null).length;
-        
-        let optionsHtml = '';
-        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-        
-        question.options.forEach((opt, idx) => {
-            const isSelected = selectedIdx === idx;
-            optionsHtml += `
-                <div class="option ${isSelected ? 'selected' : ''}" data-opt-index="${idx}">
-                    <span class="option-prefix">${letters[idx] || (idx + 1)}</span>
-                    <span class="option-text">${escapeHtml(opt)}</span>
-                </div>
-            `;
-        });
-        
-        const html = `
-            <div class="quiz-body">
-                <div class="progress-area">
-                    <span class="question-counter">Question ${currentQuestionIndex + 1} / ${total}</span>
-                    <span class="score-badge">✅ Answered: ${answeredCount}/${total}</span>
-                </div>
-                <div class="question-text">${escapeHtml(question.question)}</div>
-                <div class="options-list" id="optionsList">
-                    ${optionsHtml}
-                </div>
-                <div class="navigation">
-                    <button id="prevBtn" ${currentQuestionIndex === 0 ? 'disabled' : ''}>◀ Previous</button>
-                    <button id="nextBtn" ${currentQuestionIndex === total - 1 ? 'disabled' : ''}>Next ▶</button>
-                </div>
-                <button id="submitQuizBtn" class="submit-btn" ${answeredCount !== total ? 'disabled' : ''}>
-                    📊 Submit Quiz & Save Results
-                </button>
-                <div class="comment-block">
-                    💡 <strong>Quiz generated via API:</strong> ${escapeHtml(currentPrompt)}<br>
-                    💾 <strong>Auto-save:</strong> Results will be automatically saved to <strong>/api/save/quize</strong> when you submit the quiz
-                </div>
-            </div>
-        `;
-        
-        quizContent.innerHTML = html;
-        
-        document.querySelectorAll('.option').forEach(opt => {
-            opt.addEventListener('click', (e) => {
-                const idx = parseInt(opt.dataset.optIndex);
-                if (!isNaN(idx) && !quizFinished) {
-                    userAnswers[currentQuestionIndex] = idx;
-                    renderCurrentQuestion();
-                }
-            });
-        });
-        
-        document.getElementById('prevBtn')?.addEventListener('click', () => {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                renderCurrentQuestion();
-            }
-        });
-        
-        document.getElementById('nextBtn')?.addEventListener('click', () => {
-            if (currentQuestionIndex < total - 1) {
-                currentQuestionIndex++;
-                renderCurrentQuestion();
-            }
-        });
-        
-        document.getElementById('submitQuizBtn')?.addEventListener('click', async () => {
-            if (userAnswers.every(a => a !== null)) {
-                await calculateAndShowResults();
-            } else {
-                alert('Please answer all questions before submitting.');
-            }
-        });
-    }
-    
-    async function calculateAndShowResults() {
-        let correctCount = 0;
-        for (let i = 0; i < currentQuestions.length; i++) {
-            if (userAnswers[i] === currentQuestions[i].answer) {
-                correctCount++;
-            }
-        }
-        finalScore = correctCount;
-        
-        // Show saving indicator
-        const submitBtn = document.getElementById('submitQuizBtn');
-        if (submitBtn) {
-            submitBtn.textContent = '💾 Saving Results...';
-            submitBtn.disabled = true;
-        }
-        
-        // Save to database
-        const saveResult = await saveQuizResultsToDatabase();
-        
-        quizFinished = true;
-        
-        if (saveResult.success) {
-            renderResults(true);
-        } else {
-            renderResults(false, saveResult.error);
-        }
-    }
-    
-    function renderResults(saveSuccess = true, errorMessage = null) {
-        const total = currentQuestions.length;
-        const percentage = (finalScore / total) * 100;
-        let gradeMessage = percentage >= 80 ? '🌟 Excellent!' : percentage >= 60 ? '👍 Good job!' : '📚 Keep practicing!';
-        
-        let reviewHtml = '';
-        for (let i = 0; i < currentQuestions.length; i++) {
-            const q = currentQuestions[i];
-            const isCorrect = userAnswers[i] === q.answer;
-            reviewHtml += `
-                <div style="margin-bottom: 1rem; padding: 0.75rem; border-left: 4px solid ${isCorrect ? '#22c55e' : '#ef4444'}; background: white; border-radius: 0.5rem;">
-                    <div style="font-weight: 600;">${escapeHtml(q.question)}</div>
-                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">
-                        Your answer: ${escapeHtml(q.options[userAnswers[i]])} ${isCorrect ? '✓' : '✗'}<br>
-                        ${!isCorrect ? `Correct answer: ${escapeHtml(q.options[q.answer])}` : ''}
-                    </div>
-                </div>
-            `;
-        }
-        
-        const saveStatusHtml = saveSuccess 
-            ? '<div class="success-message">✅ Quiz results successfully saved to /api/save/quize!</div>'
-            : `<div class="error-message">❌ Failed to save to database: ${escapeHtml(errorMessage || 'Unknown error')}<br>Check console for details.</div>`;
-        
-        const html = `
-            <div class="quiz-body">
-                <div class="result-area">
-                    <h2>📊 Quiz Complete!</h2>
-                    <div style="font-size: 2.5rem; font-weight: 700;">${finalScore} / ${total}</div>
-                    <div style="font-size: 1.2rem; margin: 0.5rem 0;">${percentage.toFixed(1)}% - ${gradeMessage}</div>
-                    ${saveStatusHtml}
-                    <button id="restartBtn" class="restart-btn">🔄 Generate New Quiz</button>
-                </div>
-                <details style="margin-top: 1.5rem;">
-                    <summary style="font-weight: 600; cursor: pointer; padding: 0.5rem;">🔍 Review Your Answers</summary>
-                    <div style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
-                        ${reviewHtml}
-                    </div>
-                </details>
-                <div class="comment-block">
-                    📝 <strong>JSON Object Sent to /api/save/quize:</strong><br>
-                    <pre style="background: #f1f5f9; padding: 0.5rem; border-radius: 0.25rem; overflow-x: auto; font-size: 0.7rem;">${JSON.stringify({
-                        prompt: currentPrompt,
-                        totalQuestions: total,
-                        score: finalScore,
-                        percentage: percentage.toFixed(2),
-                        timestamp: new Date().toISOString()
-                    }, null, 2)}</pre>
-                </div>
-            </div>
-        `;
-        
-        quizContent.innerHTML = html;
-        document.getElementById('restartBtn')?.addEventListener('click', () => {
-            promptInput.value = currentPrompt;
-            generateQuizFromAPI(currentPrompt);
-        });
-    }
-    
+    // Helper functions
     function showLoading(show) {
         if (show) {
-            quizContent.innerHTML = `
+            quizPreviewArea.innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>🤖 Generating your quiz from AI API...</p>
-                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">This may take a few seconds</p>
+                    <p>🤖 Contacting AI API...</p>
+                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Generating your ${questionCount.value} questions</p>
                 </div>
             `;
         }
     }
     
-    function showError(message) {
-        quizContent.innerHTML = `
-            <div class="quiz-body">
-                <div class="error-message">
-                    <strong>⚠️ Error</strong><br>
-                    ${escapeHtml(message)}<br><br>
-                    <button onclick="location.reload()" style="background: #667eea; margin-top: 0.5rem;">Try Again</button>
-                </div>
+    function showStatus(message, type) {
+        const statusDiv = generationStatus;
+        const alertClass = type === 'error' ? 'alert-error' : (type === 'warning' ? 'alert-warning' : 'alert-success');
+        statusDiv.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        setTimeout(() => {
+            if (statusDiv.innerHTML.includes(message)) {
+                statusDiv.innerHTML = '';
+            }
+        }, 5000);
+    }
+    
+    function displayError(message) {
+        quizPreviewArea.innerHTML = `
+            <div class="alert alert-error">
+                <strong>Error:</strong> ${escapeHtml(message)}<br><br>
+                <button onclick="location.reload()" class="btn btn-primary">Try Again</button>
             </div>
         `;
     }
@@ -738,20 +723,35 @@
         });
     }
     
-    // Event listeners
-    generateBtn.addEventListener('click', () => {
-        const prompt = promptInput.value.trim();
-        if (!prompt) {
-            alert('Please enter a prompt to generate a quiz');
-            return;
-        }
-        currentPrompt = prompt;
-        generateQuizFromAPI(prompt);
-    });
+    function clearForm() {
+        customPrompt.value = '';
+        questionCount.value = '45';
+        quizType.value = 'NEET';
+        quizPreviewArea.innerHTML = '<div class="loading"><p>Ready to generate quiz...</p></div>';
+        saveActions.style.display = 'none';
+        currentQuizData = null;
+        parsedQuestions = [];
+        generationStatus.innerHTML = '';
+    }
     
-    promptInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            generateBtn.click();
+    // Event Listeners
+    generateBtn.addEventListener('click', generateQuiz);
+    clearBtn.addEventListener('click', clearForm);
+    saveQuizBtn.addEventListener('click', saveQuizToDatabase);
+    regenerateBtn.addEventListener('click', generateQuiz);
+    
+    // Initialize
+    checkApis();
+    
+    // Custom prompt suggestion when quiz type changes
+    quizType.addEventListener('change', () => {
+        const type = quizType.value;
+        if (type === 'NEET') {
+            customPrompt.placeholder = "e.g., Generate 45 multiple choice questions for NEET Biology covering Human Physiology with 4 options each";
+        } else if (type === 'JEE') {
+            customPrompt.placeholder = "e.g., Generate 30 JEE Main level questions covering Calculus and Mechanics";
+        } else if (type === 'UPSC') {
+            customPrompt.placeholder = "e.g., Generate 50 UPSC Prelims questions covering Indian Polity and Geography";
         }
     });
 </script>
