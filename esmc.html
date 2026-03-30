@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>ExpenseShare Pro | Accurate Monthly Expense Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        .glass-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+            gap: 12px;
+        }
+
+        .title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .title p {
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .credit {
+            font-size: 0.75rem;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #5a67d8;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .input-card {
+            flex: 1.2;
+            min-width: 280px;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .results-card {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 0.8rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-weight: 500;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: #f7fafc;
+            padding: 8px 16px;
+            border-radius: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            gap: 16px;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #718096, #4a5568);
+        }
+
+        .summary-box {
+            background: white;
+            border-radius: 1.3rem;
+            padding: 1.2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .expense-main {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .total-expense {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .per-person {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #48bb78;
+        }
+
+        .breakdown-list {
+            margin-top: 12px;
+        }
+
+        .break-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        .comparison-table {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 1rem;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: #f7fafc;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .highlight-row {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            font-weight: 800;
+            border-left: 4px solid #48bb78;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2d3748;
+        }
+
+        .chart-container {
+            margin-top: 1rem;
+        }
+
+        canvas {
+            max-height: 220px;
+            width: 100%;
+        }
+
+        .history-panel {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            background: #f7fafc;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .error-msg {
+            color: #e53e3e;
+            font-size: 0.7rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .info-badge {
+            background: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            color: #4a5568;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.7rem;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 1rem;
+            }
+            .total-expense, .per-person {
+                font-size: 1.3rem;
+            }
+            th, td {
+                font-size: 0.75rem;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="glass-container">
+    <div class="brand">
+        <div class="title">
+            <h1>💰 ExpenseShare Pro</h1>
+            <p>Accurate splitting · Transparent costs · Smart budgeting</p>
+        </div>
+        <div class="credit">Powered by TecReseach | Brijesh Nishad (Software Engineer)</div>
+    </div>
+
+    <div class="dashboard">
+        <div class="input-card">
+            <div class="section-title">📝 Expense Details</div>
+            <div class="form-group">
+                <label>👥 Number of people (1–10)</label>
+                <input type="number" id="peopleCount" min="1" max="10" value="3" step="1">
+                <div class="error-msg" id="peopleError">Please enter a value between 1 and 10</div>
+            </div>
+            <div class="form-group">
+                <label>🏠 Room rent (₹ / month)</label>
+                <input type="number" id="roomRent" min="0" value="6500" step="100">
+            </div>
+            <div class="form-group">
+                <label>🍳 Cooking materials (₹ / month)</label>
+                <input type="number" id="cookingMat" min="0" value="2200" step="100">
+            </div>
+            <div class="form-group">
+                <label>🥬 Vegetable cost (₹ / week)</label>
+                <input type="number" id="vegWeekly" min="0" value="500" step="50">
+                <div class="info-badge">💡 Monthly veg = Weekly × 4 weeks (simplified) OR × 4.33 for exact month</div>
+            </div>
+            <div class="form-group">
+                <div class="toggle-group">
+                    <span>🥦 Include vegetables?</span>
+                    <div class="radio-option">
+                        <label><input type="radio" name="vegToggle" value="yes" checked> Yes</label>
+                        <label><input type="radio" name="vegToggle" value="no"> No</label>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button id="calcBtn">🧮 Calculate</button>
+                <button id="resetDefaultBtn" class="reset-btn">⟳ Reset</button>
+                <button id="clearHistoryBtn" class="reset-btn">🗑 Clear History</button>
+            </div>
+            <div class="history-panel" id="historyPanel">
+                💾 Calculations auto-save | View recent history below
+            </div>
+        </div>
+
+        <div class="results-card">
+            <div class="summary-box">
+                <div class="section-title">📊 Monthly Expense Summary</div>
+                <div class="expense-main">
+                    <div><span style="font-weight:600;">Total Expense:</span><br><span id="totalExpenseDisplay" class="total-expense">₹0</span></div>
+                    <div><span style="font-weight:600;">💰 Per Person:</span><br><span id="perPersonDisplay" class="per-person">₹0</span></div>
+                </div>
+                <div class="breakdown-list" id="breakdownList"></div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="section-title">🔄 Group Size Comparison (1-3 persons)</div>
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>People</th>
+                                <th>With Veg (₹)</th>
+                                <th>Without Veg (₹)</th>
+                                <th>Per Person (With Veg)</th>
+                                <th>Per Person (Without Veg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTbody"></tbody>
+                    </table>
+                </div>
+                <div class="info-badge" style="margin-top: 10px;">
+                    ✨ Current: <strong id="currentGroupHighlight">3</strong> person(s) — highlighted in green
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="section-title">📈 Cost Comparison Chart</div>
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+                <div class="info-badge">Monthly Expense (₹) - Total cost for 1, 2, and 3 persons</div>
+            </div>
+        </div>
+    </div>
+    <footer>✅ Accurate formula: Total = Rent + Cooking + (Weekly Veg × 4 if included) | Per Person = Total ÷ People | Rounded to nearest ₹</footer>
+</div>
+
+<script>
+    // DOM Elements
+    const peopleInput = document.getElementById('peopleCount');
+    const rentInput = document.getElementById('roomRent');
+    const cookingInput = document.getElementById('cookingMat');
+    const vegWeeklyInput = document.getElementById('vegWeekly');
+    const vegYesRadio = document.querySelector('input[name="vegToggle"][value="yes"]');
+    const vegNoRadio = document.querySelector('input[name="vegToggle"][value="no"]');
+    const peopleError = document.getElementById('peopleError');
+    
+    let currentChart = null;
+    let currentValidPeople = 3;
+    
+    // Core calculation function - ACCURATE
+    function calculateExpenses(rent, cooking, vegWeekly, includeVeg, people) {
+        // Monthly veg calculation - using 4 weeks for simplicity (as per problem statement)
+        const monthlyVeg = includeVeg ? (vegWeekly * 4) : 0;
+        const totalExpense = Math.round(rent + cooking + monthlyVeg);
+        const perPerson = people > 0 ? Math.round(totalExpense / people) : 0;
+        
+        return {
+            totalExpense,
+            perPerson,
+            monthlyVeg,
+            rent: Math.round(rent),
+            cooking: Math.round(cooking)
+        };
+    }
+    
+    // Get current inputs with validation
+    function getCurrentInputs() {
+        let peopleRaw = peopleInput.value;
+        let people = parseInt(peopleRaw);
+        
+        if (isNaN(people)) {
+            people = currentValidPeople;
+            peopleError.style.display = 'block';
+        } else if (people < 1 || people > 10) {
+            peopleError.style.display = 'block';
+            people = currentValidPeople;
+        } else {
+            peopleError.style.display = 'none';
+            currentValidPeople = people;
+        }
+        
+        let rent = parseFloat(rentInput.value);
+        if (isNaN(rent) || rent < 0) rent = 0;
+        
+        let cooking = parseFloat(cookingInput.value);
+        if (isNaN(cooking) || cooking < 0) cooking = 0;
+        
+        let vegWeekly = parseFloat(vegWeeklyInput.value);
+        if (isNaN(vegWeekly) || vegWeekly < 0) vegWeekly = 0;
+        
+        const includeVeg = vegYesRadio.checked;
+        
+        return { people, rent, cooking, vegWeekly, includeVeg };
+    }
+    
+    // Get comparison data for 1, 2, 3 persons
+    function getComparisonData(rent, cooking, vegWeekly) {
+        const compData = [];
+        for (let p = 1; p <= 3; p++) {
+            // With veg
+            const monthlyVegWith = vegWeekly * 4;
+            const totalWithVeg = Math.round(rent + cooking + monthlyVegWith);
+            const perPersonWithVeg = Math.round(totalWithVeg / p);
+            
+            // Without veg
+            const totalWithoutVeg = Math.round(rent + cooking);
+            const perPersonWithoutVeg = Math.round(totalWithoutVeg / p);
+            
+            compData.push({
+                people: p,
+                totalWithVeg,
+                totalWithoutVeg,
+                perPersonWithVeg,
+                perPersonWithoutVeg
+            });
+        }
+        return compData;
+    }
+    
+    // Update all UI components
+    function updateDashboard() {
+        const { people, rent, cooking, vegWeekly, includeVeg } = getCurrentInputs();
+        
+        // Calculate current expenses
+        const { totalExpense, perPerson, monthlyVeg } = calculateExpenses(rent, cooking, vegWeekly, includeVeg, people);
+        
+        // Update summary section
+        document.getElementById('totalExpenseDisplay').innerHTML = `₹${totalExpense.toLocaleString('en-IN')}`;
+        document.getElementById('perPersonDisplay').innerHTML = `₹${perPerson.toLocaleString('en-IN')}`;
+        
+        // Update breakdown
+        const breakdownHtml = `
+            <div class="break-item">
+                <span>🏠 Room Rent</span>
+                <span>₹${Math.round(rent).toLocaleString('en-IN')}</span>
+            </div>
+            <div class="break-item">
+                <span>🍳 Cooking Materials</span>
+                <span>₹${Math.round(cooking).toLocaleString('en-IN')}</span>
+            </div>
+            <div class="break-item">
+                <span>🥬 Vegetables (Monthly)</span>
+                <span>₹${monthlyVeg.toLocaleString('en-IN')} ${!includeVeg ? '(Excluded)' : ''}</span>
+            </div>
+            <div class="break-item" style="font-weight: 800; border-top: 2px solid #e2e8f0; margin-top: 8px; padding-top: 12px;">
+                <span>🟢 TOTAL EXPENSE</span>
+                <span style="color: #667eea; font-size: 1.1rem;">₹${totalExpense.toLocaleString('en-IN')}</span>
+            </div>
+            <div class="break-item" style="background: #f0fff4; margin-top: 8px; border-radius: 8px; padding: 10px;">
+                <span>👥 PER PERSON (${people} ${people === 1 ? 'person' : 'people'})</span>
+                <span style="color: #48bb78; font-weight: 800; font-size: 1.1rem;">₹${perPerson.toLocaleString('en-IN')}</span>
+            </div>
+        `;
+        document.getElementById('breakdownList').innerHTML = breakdownHtml;
+        
+        // Update comparison table
+        const compData = getComparisonData(rent, cooking, vegWeekly);
+        const tbody = document.getElementById('comparisonTbody');
+        tbody.innerHTML = '';
+        
+        compData.forEach(item => {
+            const row = tbody.insertRow();
+            if (item.people === people) {
+                row.classList.add('highlight-row');
+            }
+            row.insertCell(0).innerHTML = `<strong>${item.people}</strong>`;
+            row.insertCell(1).innerHTML = `₹${item.totalWithVeg.toLocaleString('en-IN')}`;
+            row.insertCell(2).innerHTML = `₹${item.totalWithoutVeg.toLocaleString('en-IN')}`;
+            row.insertCell(3).innerHTML = `₹${item.perPersonWithVeg.toLocaleString('en-IN')}`;
+            row.insertCell(4).innerHTML = `₹${item.perPersonWithoutVeg.toLocaleString('en-IN')}`;
+        });
+        
+        document.getElementById('currentGroupHighlight').innerHTML = people;
+        
+        // Update chart
+        if (currentChart) {
+            currentChart.destroy();
+        }
+        
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        currentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1 Person', '2 Persons', '3 Persons'],
+                datasets: [
+                    {
+                        label: 'With Vegetables',
+                        data: compData.map(d => d.totalWithVeg),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    },
+                    {
+                        label: 'Without Vegetables',
+                        data: compData.map(d => d.totalWithoutVeg),
+                        backgroundColor: 'rgba(72, 187, 120, 0.8)',
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `₹${context.raw.toLocaleString('en-IN')}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: { font: { size: 11 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Monthly Expense (₹)',
+                            font: { weight: 'bold', size: 11 }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Save to localStorage (only if valid)
+        if (people >= 1 && people <= 10) {
+            const state = {
+                people, rent, cooking, vegWeekly, includeVeg,
+                totalExpense, perPerson,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('expenseSharePro_state', JSON.stringify(state));
+            
+            // Update history
+            let history = [];
+            const storedHistory = localStorage.getItem('expenseSharePro_history');
+            if (storedHistory) {
+                history = JSON.parse(storedHistory);
+            }
+            history.unshift(state);
+            if (history.length > 5) history.pop();
+            localStorage.setItem('expenseSharePro_history', JSON.stringify(history));
+            
+            updateHistoryPanel(history);
+        }
+    }
+    
+    // Update history panel
+    function updateHistoryPanel(history) {
+        const panel = document.getElementById('historyPanel');
+        if (!history || history.length === 0) {
+            panel.innerHTML = '📋 No history yet. Start calculating!';
+            return;
+        }
+        
+        let html = '<strong>📜 Recent Calculations (Last 5):</strong><br>';
+        history.slice(0, 5).forEach((entry, idx) => {
+            const date = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const vegStatus = entry.includeVeg ? 'With Veg' : 'No Veg';
+            const totalCorrect = entry.totalExpense;
+            const perPersonCorrect = entry.perPerson;
+            html += `
+                <div style="border-bottom: 1px solid #e2e8f0; padding: 6px 0;">
+                    👥 ${entry.people} pers | Total: ₹${totalCorrect.toLocaleString('en-IN')} | 
+                    ₹${perPersonCorrect.toLocaleString('en-IN')}/ea (${vegStatus})<br>
+                    <span style="font-size: 0.65rem; color: #718096;">${date}</span>
+                </div>
+            `;
+        });
+        panel.innerHTML = html;
+    }
+    
+    // Load from localStorage
+    function loadFromStorage() {
+        const saved = localStorage.getItem('expenseSharePro_state');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.people >= 1 && data.people <= 10) {
+                    peopleInput.value = data.people;
+                    currentValidPeople = data.people;
+                }
+                rentInput.value = data.rent;
+                cookingInput.value = data.cooking;
+                vegWeeklyInput.value = data.vegWeekly;
+                if (data.includeVeg) {
+                    vegYesRadio.checked = true;
+                } else {
+                    vegNoRadio.checked = false;
+                }
+                updateDashboard();
+            } catch(e) {
+                resetToSample();
+            }
+        } else {
+            resetToSample();
+        }
+        
+        const storedHistory = localStorage.getItem('expenseSharePro_history');
+        if (storedHistory) {
+            try {
+                updateHistoryPanel(JSON.parse(storedHistory));
+            } catch(e) {}
+        }
+    }
+    
+    // Reset to sample input
+    function resetToSample() {
+        peopleInput.value = 3;
+        currentValidPeople = 3;
+        rentInput.value = 6500;
+        cookingInput.value = 2200;
+        vegWeeklyInput.value = 500;
+        vegYesRadio.checked = true;
+        peopleError.style.display = 'none';
+        updateDashboard();
+    }
+    
+    // Clear all history
+    function clearAllHistory() {
+        localStorage.removeItem('expenseSharePro_state');
+        localStorage.removeItem('expenseSharePro_history');
+        resetToSample();
+    }
+    
+    // Handle people input with validation
+    function handlePeopleInput() {
+        let rawValue = peopleInput.value;
+        let numValue = parseInt(rawValue);
+        
+        if (isNaN(rawValue) || rawValue === '') {
+            peopleError.style.display = 'block';
+            updateDashboard();
+        } else if (numValue < 1 || numValue > 10) {
+            peopleError.style.display = 'block';
+            updateDashboard();
+        } else {
+            peopleError.style.display = 'none';
+            currentValidPeople = numValue;
+            updateDashboard();
+        }
+    }
+    
+    function handlePeopleBlur() {
+        let rawValue = peopleInput.value;
+        let numValue = parseInt(rawValue);
+        
+        if (isNaN(rawValue) || rawValue === '') {
+            peopleInput.value = currentValidPeople;
+            peopleError.style.display = 'none';
+        } else if (numValue < 1) {
+            peopleInput.value = 1;
+            currentValidPeople = 1;
+            peopleError.style.display = 'none';
+        } else if (numValue > 10) {
+            peopleInput.value = 10;
+            currentValidPeople = 10;
+            peopleError.style.display = 'none';
+        } else {
+            currentValidPeople = numValue;
+            peopleError.style.display = 'none';
+        }
+        updateDashboard();
+    }
+    
+    function handleNumericInput(input) {
+        let value = parseFloat(input.value);
+        if (isNaN(value) || value < 0) {
+            input.value = 0;
+        }
+        updateDashboard();
+    }
+    
+    // Event listeners
+    peopleInput.addEventListener('input', handlePeopleInput);
+    peopleInput.addEventListener('blur', handlePeopleBlur);
+    rentInput.addEventListener('input', () => handleNumericInput(rentInput));
+    cookingInput.addEventListener('input', () => handleNumericInput(cookingInput));
+    vegWeeklyInput.addEventListener('input', () => handleNumericInput(vegWeeklyInput));
+    vegYesRadio.addEventListener('change', () => updateDashboard());
+    vegNoRadio.addEventListener('change', () => updateDashboard());
+    document.getElementById('calcBtn').addEventListener('click', () => updateDashboard());
+    document.getElementById('resetDefaultBtn').addEventListener('click', resetToSample);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearAllHistory);
+    
+    // Initialize
+    loadFromStorage();
+    updateDashboard();
+</script>
+</body>
+</html>
