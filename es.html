@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ExpenseShare | Smart Monthly Expense Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #d4e0f7 0%, #b0c4f0 100%);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* Glassmorphism container */
+        .glass-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(14px);
+            border-radius: 2.5rem;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        /* Header / branding */
+        .brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+            padding-bottom: 1rem;
+        }
+        .title h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E2A5E, #2C3E66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .title p {
+            color: #1e2a3e;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .credit {
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.5);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            font-weight: 500;
+            color: #1e2a47;
+        }
+
+        /* main layout grid */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .input-card {
+            flex: 1.2;
+            min-width: 280px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(4px);
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .results-card {
+            flex: 2;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.3rem;
+        }
+        label {
+            font-weight: 600;
+            color: #1f2a44;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.7);
+            font-weight: 500;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            backdrop-filter: blur(2px);
+        }
+        input:focus, select:focus {
+            border-color: #2c5282;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(44,82,130,0.2);
+        }
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.6);
+            padding: 8px 15px;
+            border-radius: 2rem;
+            width: fit-content;
+        }
+        .toggle-switch span {
+            font-weight: 600;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #2c3e66;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(2px);
+            font-size: 0.85rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background: #1f2f4f;
+            transform: scale(0.97);
+        }
+        .reset-btn {
+            background: #5a6e8a;
+        }
+        .summary-box {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .total-expense {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .per-person {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f2c42;
+        }
+        .breakdown-list {
+            margin-top: 12px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+        .break-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+        .comparison-table {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.55);
+            border-radius: 1.2rem;
+            backdrop-filter: blur(2px);
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+        th {
+            background: rgba(44,62,80,0.2);
+            font-weight: 700;
+        }
+        .highlight {
+            background: rgba(46,125,50,0.2);
+            font-weight: 800;
+            border-radius: 12px;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1e2a47;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #2c3e66;
+            font-weight: 500;
+        }
+        @media (max-width: 720px) {
+            .glass-container {
+                padding: 1.2rem;
+            }
+            .total-expense { font-size: 1.5rem; }
+            .per-person { font-size: 1.2rem; }
+        }
+        .chart-area {
+            margin-top: 0.5rem;
+        }
+        canvas {
+            max-height: 180px;
+            width: 100%;
+            background: rgba(255,255,240,0.3);
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="glass-container">
+    <div class="brand">
+        <div class="title">
+            <h1>✨ ExpenseShare</h1>
+            <p>Smart split · transparent living · budget planner</p>
+        </div>
+        <div class="credit">Powered by TecReseach | Brijesh Nishad (Software Engineer)</div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Input Panel -->
+        <div class="input-card">
+            <div class="section-title">📋 Expense details</div>
+            <div class="form-group">
+                <label>👥 Number of people (1–10)</label>
+                <input type="number" id="peopleCount" min="1" max="10" value="3" step="1">
+            </div>
+            <div class="form-group">
+                <label>🏠 Room rent (₹)</label>
+                <input type="number" id="roomRent" min="0" value="6500" step="500">
+            </div>
+            <div class="form-group">
+                <label>🍳 Cooking materials (₹/month)</label>
+                <input type="number" id="cookingMat" min="0" value="2200" step="200">
+            </div>
+            <div class="form-group">
+                <label>🥬 Vegetable cost (₹/week)</label>
+                <input type="number" id="vegWeekly" min="0" value="500" step="50">
+            </div>
+            <div class="form-group">
+                <div class="toggle-switch">
+                    <span>🥦 Include vegetables?</span>
+                    <label style="display: flex; gap: 12px; align-items: center;">
+                        <input type="radio" name="vegToggle" value="yes" checked> Yes
+                        <input type="radio" name="vegToggle" value="no"> No
+                    </label>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button id="calcBtn">🧮 Calculate & Save</button>
+                <button id="resetDefaultBtn" class="reset-btn">⟳ Reset Defaults</button>
+                <button id="clearHistoryBtn" class="reset-btn" style="background:#7f5a83;">🗑 Clear history</button>
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.7rem; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 1rem; text-align: center;">
+                💡 Last calculation auto-saved in local storage
+            </div>
+        </div>
+
+        <!-- Results & Comparison -->
+        <div class="results-card">
+            <div class="summary-box">
+                <div class="section-title">📊 Monthly Expense Summary</div>
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                    <div><span style="font-weight:500;">Total Expense:</span> <span id="totalExpenseDisplay" class="total-expense">₹0</span></div>
+                    <div><span style="font-weight:500;">Per Person:</span> <span id="perPersonDisplay" class="per-person">₹0</span></div>
+                </div>
+                <div class="breakdown-list" id="breakdownList">
+                    <!-- dynamic breakdown -->
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="section-title">🔄 Group Size Comparison (with/without veg)</div>
+                <div class="comparison-table">
+                    <table id="comparisonTable">
+                        <thead>
+                            <tr><th>People</th><th>With Veg (₹)</th><th>Without Veg (₹)</th></tr>
+                        </thead>
+                        <tbody id="comparisonTbody">
+                            <!-- filled via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="summary-box chart-area">
+                <div class="section-title">📈 Visual Comparison</div>
+                <canvas id="expenseChart" width="400" height="160" style="max-height: 200px; width:100%"></canvas>
+            </div>
+        </div>
+    </div>
+    <footer>✔ Accurate split • Weekly veg → Monthly (×4) • Rounded to nearest ₹ • Supports 1 to 10 persons</footer>
+</div>
+
+<script>
+    // Helper: get numeric values
+    function getInputs() {
+        let people = parseInt(document.getElementById('peopleCount').value) || 1;
+        if (people < 1) people = 1;
+        if (people > 10) people = 10;
+        let rent = parseFloat(document.getElementById('roomRent').value) || 0;
+        let cooking = parseFloat(document.getElementById('cookingMat').value) || 0;
+        let vegWeekly = parseFloat(document.getElementById('vegWeekly').value) || 0;
+        let includeVeg = document.querySelector('input[name="vegToggle"]:checked').value === 'yes';
+        return { people, rent, cooking, vegWeekly, includeVeg };
+    }
+
+    // Core calculation: returns totalExpense, perPerson, vegMonthly
+    function computeExpense(rent, cooking, vegWeekly, includeVeg) {
+        let vegMonthly = includeVeg ? (vegWeekly * 4) : 0;
+        let total = rent + cooking + vegMonthly;
+        return { total: Math.round(total), vegMonthly: Math.round(vegMonthly) };
+    }
+
+    // Get full per-person breakdown & total with given params
+    function getFullCalculation(people, rent, cooking, vegWeekly, includeVeg) {
+        let vegMonthly = includeVeg ? (vegWeekly * 4) : 0;
+        let total = rent + cooking + vegMonthly;
+        total = Math.round(total);
+        let perPerson = people > 0 ? Math.round(total / people) : 0;
+        return { total, perPerson, vegMonthly: Math.round(vegMonthly), rent, cooking };
+    }
+
+    // generate comparison for 1,2,3 persons (based on current rent/cooking/vegWeekly)
+    function getComparisonData(rent, cooking, vegWeekly) {
+        let comp = [];
+        for (let p = 1; p <= 3; p++) {
+            let totalWithVeg = Math.round(rent + cooking + (vegWeekly * 4));
+            let totalWithoutVeg = Math.round(rent + cooking);
+            let perWithVeg = Math.round(totalWithVeg / p);
+            let perWithoutVeg = Math.round(totalWithoutVeg / p);
+            comp.push({ people: p, withVeg: totalWithVeg, withoutVeg: totalWithoutVeg, perWithVeg, perWithoutVeg });
+        }
+        return comp;
+    }
+
+    // Render main summary, breakdown, comparison table, update chart, and save to localStorage
+    function updateAll() {
+        let { people, rent, cooking, vegWeekly, includeVeg } = getInputs();
+        // clamp people
+        people = Math.min(10, Math.max(1, people));
+        document.getElementById('peopleCount').value = people;
+        
+        let vegMonthlyActual = includeVeg ? (vegWeekly * 4) : 0;
+        let total = Math.round(rent + cooking + vegMonthlyActual);
+        let perPerson = people > 0 ? Math.round(total / people) : 0;
+        
+        // update summary display
+        document.getElementById('totalExpenseDisplay').innerHTML = `₹${total.toLocaleString('en-IN')}`;
+        document.getElementById('perPersonDisplay').innerHTML = `₹${perPerson.toLocaleString('en-IN')}`;
+        
+        // Breakdown HTML
+        let breakdownHtml = `
+            <div class="break-item"><span>🏠 Room Rent:</span><span>₹${Math.round(rent).toLocaleString('en-IN')}</span></div>
+            <div class="break-item"><span>🍳 Cooking Materials:</span><span>₹${Math.round(cooking).toLocaleString('en-IN')}</span></div>
+            <div class="break-item"><span>🥬 Vegetables (monthly):</span><span>₹${Math.round(vegMonthlyActual).toLocaleString('en-IN')} ${!includeVeg ? '(excluded)' : ''}</span></div>
+            <div class="break-item" style="font-weight:800; border-bottom:none;"><span>➕ Total Expense:</span><span>₹${total.toLocaleString('en-IN')}</span></div>
+        `;
+        document.getElementById('breakdownList').innerHTML = breakdownHtml;
+        
+        // comparison table for 1,2,3 persons (show total expense, but also per person can be derived but requirement shows with Veg (₹) total, Without Veg total. as sample output)
+        // Actually sample comparison output shows total monthly expense per group size: People | With Veg (₹) | Without Veg (₹)
+        let compData = [];
+        for (let n = 1; n <= 3; n++) {
+            let totalWV = Math.round(rent + cooking + (vegWeekly * 4));
+            let totalWoV = Math.round(rent + cooking);
+            compData.push({ people: n, withVegTotal: totalWV, withoutVegTotal: totalWoV });
+        }
+        let tbody = document.getElementById('comparisonTbody');
+        tbody.innerHTML = '';
+        compData.forEach(row => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${row.people}</strong></td>
+                <td>₹${row.withVegTotal.toLocaleString('en-IN')}</td>
+                <td>₹${row.withoutVegTotal.toLocaleString('en-IN')}</td>
+            `;
+            if (row.people === people) {
+                tr.style.background = "rgba(70, 130, 200, 0.2)";
+                tr.style.fontWeight = "bold";
+            }
+            tbody.appendChild(tr);
+        });
+        
+        // Also display extra per-person highlight in comparison card? we can add small note
+        // Now update Chart.js (Bar chart for withVeg vs withoutVeg for 1,2,3 persons)
+        if (window.myChart) {
+            window.myChart.destroy();
+        }
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1 Person', '2 Persons', '3 Persons'],
+                datasets: [
+                    {
+                        label: 'With Vegetables (₹)',
+                        data: compData.map(d => d.withVegTotal),
+                        backgroundColor: 'rgba(46, 125, 50, 0.7)',
+                        borderRadius: 8,
+                    },
+                    {
+                        label: 'Without Vegetables (₹)',
+                        data: compData.map(d => d.withoutVegTotal),
+                        backgroundColor: 'rgba(211, 84, 0, 0.7)',
+                        borderRadius: 8,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `₹${ctx.raw.toLocaleString('en-IN')}` } },
+                    legend: { position: 'top', labels: { font: { size: 10 } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Monthly Expense (₹)', font: { weight: 'bold' } } }
+                }
+            }
+        });
+        
+        // Save current calculation state to localStorage (including all fields)
+        const stateToSave = {
+            people, rent, cooking, vegWeekly, includeVeg,
+            timestamp: new Date().toISOString(),
+            totalExpense: total,
+            perPerson: perPerson
+        };
+        localStorage.setItem('expenseShare_lastState', JSON.stringify(stateToSave));
+        // Also maintain a small history log of last 3 entries (enhancement)
+        let historyArr = [];
+        const storedHistory = localStorage.getItem('expenseShare_history');
+        if (storedHistory) historyArr = JSON.parse(storedHistory);
+        historyArr.unshift({ ...stateToSave, id: Date.now() });
+        if (historyArr.length > 5) historyArr.pop();
+        localStorage.setItem('expenseShare_history', JSON.stringify(historyArr));
+        
+        // extra: update optional 'last saved' text
+        const lastSavedDiv = document.querySelector('.input-card .btn-group + div');
+        if(lastSavedDiv) {
+            let lastTime = new Date().toLocaleTimeString();
+            lastSavedDiv.innerHTML = `💾 Saved at ${lastTime} • Last 5 calculations stored.`;
+        }
+    }
+    
+    // load from localStorage if exists
+    function loadFromStorage() {
+        const saved = localStorage.getItem('expenseShare_lastState');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                document.getElementById('peopleCount').value = data.people;
+                document.getElementById('roomRent').value = data.rent;
+                document.getElementById('cookingMat').value = data.cooking;
+                document.getElementById('vegWeekly').value = data.vegWeekly;
+                if (data.includeVeg) {
+                    document.querySelector('input[name="vegToggle"][value="yes"]').checked = true;
+                } else {
+                    document.querySelector('input[name="vegToggle"][value="no"]').checked = true;
+                }
+                updateAll();
+            } catch(e) { console.warn(e); }
+        } else {
+            // set defaults as sample: 3 people, 6500, 2200, 500 veg, yes
+            updateAll();
+        }
+    }
+    
+    // reset to sample input exactly (problem statement)
+    function resetToSample() {
+        document.getElementById('peopleCount').value = 3;
+        document.getElementById('roomRent').value = 6500;
+        document.getElementById('cookingMat').value = 2200;
+        document.getElementById('vegWeekly').value = 500;
+        document.querySelector('input[name="vegToggle"][value="yes"]').checked = true;
+        updateAll();
+    }
+    
+    // clear full localStorage and reinit to defaults (sample)
+    function clearHistoryAndStorage() {
+        localStorage.removeItem('expenseShare_lastState');
+        localStorage.removeItem('expenseShare_history');
+        // optional reset to default sample
+        resetToSample();
+        // show toast-like (just alert)
+        alert("🧹 All saved history & last state cleared. Reset to default sample.");
+    }
+    
+    // additional feature: show history in dropdown? but optional: we can display a small history in tooltip but given constraints, let's add history button but keep minimal.
+    // For extra polish, I'll add a little floating display of last 3 recorded expenses in the input card, enhancing user experience
+    function displayRecentHistory() {
+        const historyRaw = localStorage.getItem('expenseShare_history');
+        if (!historyRaw) return;
+        try {
+            let history = JSON.parse(historyRaw);
+            if (history.length === 0) return;
+            let historyHtml = `<div style="margin-top: 15px; font-size: 0.7rem; background: rgba(0,0,0,0.05); border-radius: 1rem; padding: 0.5rem;"><strong>📜 Recent calculations:</strong><br/>`;
+            history.slice(0, 3).forEach(entry => {
+                let date = new Date(entry.timestamp).toLocaleString().split(',')[0];
+                historyHtml += `👥 ${entry.people}pers | Total ₹${entry.totalExpense} | ₹${entry.perPerson}/ea <span style="opacity:0.7;">(${date})</span><br/>`;
+            });
+            historyHtml += `</div>`;
+            const existing = document.querySelector('.history-panel');
+            if(existing) existing.remove();
+            const panel = document.createElement('div');
+            panel.className = 'history-panel';
+            panel.innerHTML = historyHtml;
+            const inputCard = document.querySelector('.input-card');
+            if(inputCard && !document.querySelector('.history-panel')) {
+                inputCard.appendChild(panel);
+            } else if(inputCard) {
+                const old = document.querySelector('.history-panel');
+                if(old) old.remove();
+                inputCard.appendChild(panel);
+            }
+        } catch(e) {}
+    }
+    
+    // Listeners and init
+    document.getElementById('calcBtn').addEventListener('click', () => {
+        updateAll();
+        displayRecentHistory();
+    });
+    document.getElementById('resetDefaultBtn').addEventListener('click', resetToSample);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearHistoryAndStorage);
+    
+    // add event listeners on all numeric inputs + toggle for realtime? but we'll use calculate button
+    // also ensure that updating people input triggers validation, but we will also add on change for inputs for smoother experience? optionally.
+    const inputs = ['peopleCount', 'roomRent', 'cookingMat', 'vegWeekly'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+            // optional: auto-update? but we keep explicit calculate, but better to auto update? for user convenience I'll make auto-update
+            updateAll();
+            displayRecentHistory();
+        });
+    });
+    const radios = document.querySelectorAll('input[name="vegToggle"]');
+    radios.forEach(radio => radio.addEventListener('change', () => {
+        updateAll();
+        displayRecentHistory();
+    }));
+    
+    // also on load
+    window.addEventListener('DOMContentLoaded', () => {
+        loadFromStorage();
+        displayRecentHistory();
+        // edge case: ensure any negative numbers or high cost rounding works
+        // add validation to ensure positive numbers
+        function sanitizeNumberInputs() {
+            let rentField = document.getElementById('roomRent');
+            if (parseFloat(rentField.value) < 0) rentField.value = 0;
+            let cookField = document.getElementById('cookingMat');
+            if (parseFloat(cookField.value) < 0) cookField.value = 0;
+            let vegField = document.getElementById('vegWeekly');
+            if (parseFloat(vegField.value) < 0) vegField.value = 0;
+            let peopleField = document.getElementById('peopleCount');
+            let peopleVal = parseInt(peopleField.value);
+            if (peopleVal < 1) peopleField.value = 1;
+            if (peopleVal > 10) peopleField.value = 10;
+        }
+        const allNumberInputs = ['roomRent', 'cookingMat', 'vegWeekly', 'peopleCount'];
+        allNumberInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                if (this.value < 0) this.value = 0;
+                if (id === 'peopleCount') {
+                    let v = parseInt(this.value);
+                    if (v < 1) this.value = 1;
+                    if (v > 10) this.value = 10;
+                }
+                updateAll();
+                displayRecentHistory();
+            });
+        });
+        updateAll();
+    });
+    
+    // Additional accuracy: Monthly Vegetables = Weekly * 4 exactly. rounding to nearest integer. Already done.
+    // For large cost up to 1,00,000+ works. Example edge case zero veg cost.
+    // Also handle single person scenario, shows per person = total.
+</script>
+</body>
+</html>
