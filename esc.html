@@ -339,7 +339,7 @@
             <h1>💰 ExpenseShare Pro</h1>
             <p>Smart split · Transparent costs · Real-time comparison</p>
         </div>
-        <div class="credit">Powered by TecReseach | Brijesh Nishad (Software Engineer)</div>
+        <div class="credit">Powered by Tecresearch</div>
     </div>
 
     <div class="dashboard">
@@ -505,7 +505,7 @@
             <div class="break-item"><span>🏠 Room Rent:</span><span>₹${Math.round(rent).toLocaleString('en-IN')}</span></div>
             <div class="break-item"><span>🍳 Cooking Materials:</span><span>₹${Math.round(cooking).toLocaleString('en-IN')}</span></div>
             <div class="break-item"><span>🥬 Vegetables (monthly):</span><span>₹${vegMonthly.toLocaleString('en-IN')} ${!includeVeg ? '(excluded)' : ''}</span></div>
-            <div class="break-item" style="font-weight:800; border-bottom:none; margin-top:6px;"><span>✅ Total Monthly:</span><span>₹${totalExpense.toLocaleString('en-IN')}</span></div>
+            <div class="break-item" style="font-weight:800; border-bottom:none; margin-top:6px;"><span>🟢 Total Monthly:</span><span>₹${totalExpense.toLocaleString('en-IN')}</span></div>
             <div class="break-item" style="color:#2c5e2e;"><span>👥 Per Person Share (${people} ${people === 1 ? 'person' : 'people'}):</span><span><strong>₹${perPerson.toLocaleString('en-IN')}</strong></span></div>
         `;
         document.getElementById('breakdownList').innerHTML = breakdownHtml;
