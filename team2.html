@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 VIRTUAL ENGINEER AI · Multi-Agent Role-Based Simulation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #151e30 100%);
+            color: #e8edff;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        .dashboard {
+            max-width: 2200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px 25px;
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 60px;
+            border: 1px solid #2a4a7a;
+        }
+
+        .title-section h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #a8c0ff, #3f6ef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .team-leader-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(59, 130, 246, 0.15);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid #3b82f6;
+        }
+
+        .leader-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid #2a4a7a;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #60a5fa;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px #1e3a8a80;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* Scrum Board */
+        .scrum-section {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #2a4a7a;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .story-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .story-card {
+            background: linear-gradient(135deg, #1e2a4a, #152038);
+            border-radius: 16px;
+            padding: 15px 20px;
+            border-left: 4px solid;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .story-card[data-status="backlog"] { border-left-color: #64748b; }
+        .story-card[data-status="todo"] { border-left-color: #3b82f6; }
+        .story-card[data-status="in-progress"] { border-left-color: #f59e0b; }
+        .story-card[data-status="review"] { border-left-color: #8b5cf6; }
+        .story-card[data-status="done"] { border-left-color: #10b981; opacity: 0.7; }
+
+        .story-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #1e3a5f;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transition: width 0.5s;
+            width: 0%;
+        }
+
+        /* Code Editor Panel */
+        .editor-section {
+            background: #0d1421;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #2a4a7a;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a4a7a;
+        }
+
+        .engineer-selector {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .engineer-btn {
+            padding: 5px 12px;
+            background: #1a2744;
+            border: none;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .engineer-btn.active {
+            background: #3b82f6;
+        }
+
+        .code-container {
+            flex: 1;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: #0a0e1a;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 2px 0;
+            border-bottom: 1px solid #1a2744;
+        }
+
+        .line-number {
+            width: 40px;
+            color: #4a6a8a;
+            text-align: right;
+            padding-right: 15px;
+            user-select: none;
+        }
+
+        .line-content {
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .bug-highlight {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 3px solid #ef4444;
+        }
+
+        .fix-highlight {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 3px solid #10b981;
+        }
+
+        .terminal-output {
+            background: #0a0e1a;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            color: #10b981;
+            padding: 2px 0;
+        }
+
+        /* Kanban Grid */
+        .kanban-section {
+            margin-top: 20px;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .agent-kanban {
+            background: rgba(12, 22, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid #2e4b8a;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .agent-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        .agent-icon.working::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            bottom: -2px;
+            right: -2px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .expertise-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 3px;
+        }
+
+        .kanban-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .kanban-col {
+            background: #0a1222;
+            border-radius: 12px;
+            padding: 8px 4px;
+            min-height: 120px;
+        }
+
+        .task-card {
+            background: #1a2744;
+            margin-bottom: 6px;
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            border-left: 3px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .task-card[data-status="todo"] { border-left-color: #64748b; }
+        .task-card[data-status="in-progress"] { border-left-color: #f59e0b; }
+        .task-card[data-status="review"] { border-left-color: #8b5cf6; }
+        .task-card[data-status="done"] { border-left-color: #10b981; }
+
+        /* Activity Log */
+        .activity-feed {
+            background: #0a1222e0;
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2a4a7a;
+            margin-top: 20px;
+        }
+
+        .log-container {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid #1e3a5f;
+            display: flex;
+            gap: 15px;
+        }
+
+        .working-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+        <div class="title-section">
+            <h1><i class="fas fa-robot" style="margin-right: 10px;"></i>VIRTUAL ENGINEER AI · Role-Based Multi-Agent</h1>
+            <div style="font-size: 0.9rem; opacity: 0.8;">
+                <i class="fas fa-users"></i> 5 Active Engineers · Expertise-Based Task Assignment
+            </div>
+        </div>
+        <div class="team-leader-card">
+            <div class="leader-avatar">BN</div>
+            <div>
+                <h3>Brijesh Nishad</h3>
+                <p style="font-size: 0.8rem;"><i class="fas fa-crown" style="color: #fbbf24;"></i> Team Lead · Task Orchestrator</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="totalStories">15</div>
+            <div class="stat-label">Total Stories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="inProgressStories">0</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="reviewStories">0</div>
+            <div class="stat-label">In Review</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="doneStories">0</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="activeEngineers">0</div>
+            <div class="stat-label">Active Engineers</div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <button class="btn" id="startSimulation">
+            <i class="fas fa-play"></i> Start All Engineers
+        </button>
+        <button class="btn" id="stopSimulation" style="background: #4a5568;" disabled>
+            <i class="fas fa-stop"></i> Pause
+        </button>
+        <button class="btn" id="resetSimulation" style="background: #6b7280;">
+            <i class="fas fa-rotate-left"></i> Reset
+        </button>
+        <button class="btn" id="assignAllTasks" style="background: #8b5cf6;">
+            <i class="fas fa-tasks"></i> Assign All Tasks
+        </button>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+            <span class="working-indicator"></span>
+            <span style="color: #60a5fa;" id="simulationStatus">Ready</span>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+        <!-- Scrum Board -->
+        <div class="scrum-section">
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-tasks"></i> Scrum Board · All Stories</h3>
+            <div class="story-list" id="scrumBoard"></div>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="editor-section">
+            <div class="editor-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-code"></i>
+                    <span id="currentFile">Select an engineer to view code</span>
+                </div>
+                <div class="engineer-selector" id="engineerSelector">
+                    <!-- Engineer tabs will be dynamically populated -->
+                </div>
+            </div>
+            <div class="code-container" id="codeEditor">
+                <div style="color: #4a6a8a; text-align: center; padding: 40px;">
+                    <i class="fas fa-user-cog" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <br>Select an engineer above to view their active workspace
+                </div>
+            </div>
+            <div class="terminal-output" id="terminal">
+                <div class="terminal-line">$ System initialized · 5 engineers ready</div>
+                <div class="terminal-line">$ Waiting for task assignment...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engineers Kanban Grid -->
+    <div class="kanban-section">
+        <h3 style="margin-bottom: 10px;"><i class="fas fa-users-gear"></i> Virtual Engineers · Live Workspaces</h3>
+        <div class="agents-grid" id="kanbanGrid"></div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="activity-feed">
+        <h3 style="margin-bottom: 15px;"><i class="fas fa-terminal"></i> Real-time DevOps Activity · All Engineers</h3>
+        <div class="log-container" id="activityLog"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- CONFIGURATION WITH EXPERTISE ----------
+        const ENGINEERS = [
+            { 
+                id: 'eng1', 
+                name: 'Aarav Kapoor', 
+                short: 'AK', 
+                color: '#3b82f6',
+                role: 'Senior Full-stack',
+                expertise: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'GraphQL'],
+                techStack: 'MERN Stack',
+                repo: null,
+                currentFile: null
+            },
+            { 
+                id: 'eng2', 
+                name: 'Priya Menon', 
+                short: 'PM', 
+                color: '#8b5cf6',
+                role: 'Backend Specialist',
+                expertise: ['Python', 'Django', 'PostgreSQL', 'Redis', 'Microservices'],
+                techStack: 'Python/Django',
+                repo: null,
+                currentFile: null
+            },
+            { 
+                id: 'eng3', 
+                name: 'Rohan Desai', 
+                short: 'RD', 
+                color: '#f59e0b',
+                role: 'Frontend Architect',
+                expertise: ['React', 'Vue.js', 'Tailwind', 'Webpack', 'Jest'],
+                techStack: 'React/Vue',
+                repo: null,
+                currentFile: null
+            },
+            { 
+                id: 'eng4', 
+                name: 'Meera Iyer', 
+                short: 'MI', 
+                color: '#10b981',
+                role: 'DevOps Engineer',
+                expertise: ['Docker', 'Kubernetes', 'AWS', 'Terraform', 'CI/CD'],
+                techStack: 'DevOps/AWS',
+                repo: null,
+                currentFile: null
+            },
+            { 
+                id: 'eng5', 
+                name: 'Vikram Singh', 
+                short: 'VS', 
+                color: '#ef4444',
+                role: 'QA & Security',
+                expertise: ['Testing', 'Security', 'Penetration Testing', 'Jest', 'Cypress'],
+                techStack: 'QA/Security',
+                repo: null,
+                currentFile: null
+            }
+        ];
+
+        // Stories with tech stack requirements
+        let stories = [
+            // Aarav's expertise - Full-stack
+            { id: 'ST-401', title: 'Implement GraphQL API for user data', points: 5, techStack: 'GraphQL', file: 'graphql/resolvers.js', assignee: null, status: 'backlog', progress: 0, bugLine: 15 },
+            { id: 'ST-402', title: 'Fix MongoDB aggregation pipeline', points: 3, techStack: 'MongoDB', file: 'services/userService.js', assignee: null, status: 'backlog', progress: 0, bugLine: 23 },
+            { id: 'ST-403', title: 'Add TypeScript types to API routes', points: 3, techStack: 'TypeScript', file: 'types/api.ts', assignee: null, status: 'backlog', progress: 0, bugLine: 8 },
+            
+            // Priya's expertise - Backend/Python
+            { id: 'ST-404', title: 'Optimize Django ORM queries', points: 5, techStack: 'Django', file: 'models.py', assignee: null, status: 'backlog', progress: 0, bugLine: 42 },
+            { id: 'ST-405', title: 'Implement Redis caching layer', points: 5, techStack: 'Redis', file: 'cache/redis_client.py', assignee: null, status: 'backlog', progress: 0, bugLine: 18 },
+            { id: 'ST-406', title: 'Fix PostgreSQL connection pool', points: 3, techStack: 'PostgreSQL', file: 'db/connection.py', assignee: null, status: 'backlog', progress: 0, bugLine: 31 },
+            
+            // Rohan's expertise - Frontend
+            { id: 'ST-407', title: 'Create reusable DataTable component', points: 3, techStack: 'React', file: 'components/DataTable.jsx', assignee: null, status: 'backlog', progress: 0, bugLine: 12 },
+            { id: 'ST-408', title: 'Implement Tailwind dark mode', points: 2, techStack: 'Tailwind', file: 'tailwind.config.js', assignee: null, status: 'backlog', progress: 0, bugLine: 7 },
+            { id: 'ST-409', title: 'Fix Webpack bundle splitting', points: 3, techStack: 'Webpack', file: 'webpack.config.js', assignee: null, status: 'backlog', progress: 0, bugLine: 45 },
+            
+            // Meera's expertise - DevOps
+            { id: 'ST-410', title: 'Optimize Docker multi-stage build', points: 3, techStack: 'Docker', file: 'Dockerfile', assignee: null, status: 'backlog', progress: 0, bugLine: 10 },
+            { id: 'ST-411', title: 'Configure K8s horizontal autoscaling', points: 5, techStack: 'Kubernetes', file: 'k8s/hpa.yaml', assignee: null, status: 'backlog', progress: 0, bugLine: 22 },
+            { id: 'ST-412', title: 'Setup AWS CloudFront CDN', points: 3, techStack: 'AWS', file: 'terraform/cdn.tf', assignee: null, status: 'backlog', progress: 0, bugLine: 15 },
+            
+            // Vikram's expertise - QA/Security
+            { id: 'ST-413', title: 'Fix XSS vulnerability in comment section', points: 5, techStack: 'Security', file: 'utils/sanitizer.js', assignee: null, status: 'backlog', progress: 0, bugLine: 8 },
+            { id: 'ST-414', title: 'Implement rate limiting middleware', points: 3, techStack: 'Security', file: 'middleware/rateLimit.js', assignee: null, status: 'backlog', progress: 0, bugLine: 14 },
+            { id: 'ST-415', title: 'Add Cypress E2E tests for checkout', points: 5, techStack: 'Cypress', file: 'cypress/e2e/checkout.cy.js', assignee: null, status: 'backlog', progress: 0, bugLine: 20 }
+        ];
+
+        // Code files for each engineer
+        const codeFiles = {
+            'eng1': {
+                'graphql/resolvers.js': `import { User, Post } from '../models';\nimport { AuthenticationError } from 'apollo-server';\n\nexport const resolvers = {\n  Query: {\n    users: async () => {\n      // BUG: No pagination - potential performance issue\n      return await User.find();\n    },\n    user: async (_, { id }) => {\n      return await User.findById(id);\n    }\n  },\n  Mutation: {\n    createUser: async (_, { input }) => {\n      // BUG: Missing input validation\n      const user = new User(input);\n      return await user.save();\n    }\n  }\n};`,
+                'services/userService.js': `import { User } from '../models';\n\nexport class UserService {\n  async getUsersWithPosts() {\n    // BUG: Inefficient aggregation pipeline\n    return await User.aggregate([\n      { $lookup: {\n        from: 'posts',\n        localField: '_id',\n        foreignField: 'userId',\n        as: 'posts'\n      }}\n    ]);\n  }\n}`,
+                'types/api.ts': `interface User {\n  id: string;\n  email: string;\n  name: string;\n}\n\n// BUG: Missing proper typing\nexport type ApiResponse = {\n  data: any;\n  error?: string;\n};`
+            },
+            'eng2': {
+                'models.py': `from django.db import models\n\nclass User(models.Model):\n    email = models.EmailField()\n    name = models.CharField(max_length=100)\n    \nclass Order(models.Model):\n    user = models.ForeignKey(User, on_delete=models.CASCADE)\n    total = models.DecimalField(max_digits=10, decimal_places=2)\n    \n# BUG: N+1 query issue\ndef get_user_orders(user_id):\n    user = User.objects.get(id=user_id)\n    return user.order_set.all()`,
+                'cache/redis_client.py': `import redis\n\n# BUG: No connection pooling\nredis_client = redis.Redis(\n    host='localhost',\n    port=6379,\n    decode_responses=True\n)\n\ndef cache_get(key):\n    return redis_client.get(key)`,
+                'db/connection.py': `import psycopg2\nfrom psycopg2 import pool\n\n# BUG: Connection pool not properly configured\ntry:\n    connection_pool = psycopg2.pool.SimpleConnectionPool(\n        1, 20,  # min, max connections\n        database="mydb"\n    )\nexcept Exception as e:\n    print(f"Pool error: {e}")`
+            },
+            'eng3': {
+                'components/DataTable.jsx': `import React, { useState } from 'react';\n\nexport const DataTable = ({ data }) => {\n  const [sortField, setSortField] = useState(null);\n  \n  // BUG: Sorting mutates original data\n  const sortedData = data.sort((a, b) => {\n    return a[sortField] > b[sortField] ? 1 : -1;\n  });\n  \n  return (\n    <table>\n      {sortedData.map(row => <tr key={row.id}>...</tr>)}\n    </table>\n  );\n};`,
+                'tailwind.config.js': `module.exports = {\n  content: ['./src/**/*.{js,jsx}'],\n  theme: {\n    extend: {}\n  },\n  // BUG: Dark mode not configured\n  plugins: []\n};`,
+                'webpack.config.js': `module.exports = {\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js'\n  },\n  // BUG: No code splitting configuration\n  optimization: {}\n};`
+            },
+            'eng4': {
+                'Dockerfile': `FROM node:16\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\n# BUG: Not using multi-stage build\nCMD ["node", "server.js"]`,
+                'k8s/hpa.yaml': `apiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: app-hpa\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: app\n  # BUG: Missing metrics configuration\n  maxReplicas: 10`,
+                'terraform/cdn.tf': `resource "aws_cloudfront_distribution" "cdn" {\n  origin {\n    domain_name = aws_s3_bucket.static.bucket_regional_domain_name\n    origin_id   = "S3-static"\n  }\n  enabled = true\n  # BUG: Missing cache behavior configuration\n}`
+            },
+            'eng5': {
+                'utils/sanitizer.js': `export function sanitizeInput(input) {\n  // BUG: Incomplete XSS protection\n  return input.replace(/<script>/gi, '');\n}\n\nexport function escapeHtml(unsafe) {\n  return unsafe;\n}`,
+                'middleware/rateLimit.js': `const rateLimit = require('express-rate-limit');\n\n// BUG: Rate limit too permissive\nexport const limiter = rateLimit({\n  windowMs: 15 * 60 * 1000,\n  max: 1000\n});`,
+                'cypress/e2e/checkout.cy.js': `describe('Checkout Flow', () => {\n  it('should complete purchase', () => {\n    cy.visit('/checkout');\n    // BUG: Missing test assertions\n    cy.get('#submit').click();\n  });\n});`
+            }
+        };
+
+        let engineerTasks = {};
+        ENGINEERS.forEach(e => { engineerTasks[e.id] = []; });
+
+        let activityLogs = [
+            { time: '09:00:00', message: '🤖 Multi-agent system initialized with 5 specialized engineers', icon: 'fa-robot' },
+            { time: '09:00:05', message: '👔 Brijesh Nishad online - Ready to assign tasks based on expertise', icon: 'fa-user-tie' }
+        ];
+
+        let isRunning = false;
+        let simulationInterval = null;
+        let selectedEngineer = 'eng1';
+        let simulationSpeed = 5000;
+
+        // ---------- HELPER FUNCTIONS ----------
+        function findBestEngineerForStory(story) {
+            return ENGINEERS.find(eng => 
+                eng.expertise.some(exp => 
+                    story.techStack.toLowerCase().includes(exp.toLowerCase()) ||
+                    story.title.toLowerCase().includes(exp.toLowerCase())
+                )
+            );
+        }
+
+        function addLog(message, icon = 'fa-info-circle') {
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            activityLogs.push({ time, message, icon });
+            if (activityLogs.length > 20) activityLogs.shift();
+            
+            const container = document.getElementById('activityLog');
+            container.innerHTML = activityLogs.slice().reverse().map(log => `
+                <div class="log-entry">
+                    <span style="color: #60a5fa;">[${log.time}]</span>
+                    <span><i class="fas ${log.icon}"></i> ${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalStories').textContent = stories.length;
+            document.getElementById('inProgressStories').textContent = stories.filter(s => s.status === 'in-progress').length;
+            document.getElementById('reviewStories').textContent = stories.filter(s => s.status === 'review').length;
+            document.getElementById('doneStories').textContent = stories.filter(s => s.status === 'done').length;
+            document.getElementById('activeEngineers').textContent = ENGINEERS.filter(e => 
+                engineerTasks[e.id].some(t => t.status === 'in-progress')
+            ).length;
+        }
+
+        // ---------- RENDER FUNCTIONS ----------
+        function renderScrumBoard() {
+            const container = document.getElementById('scrumBoard');
+            let html = '';
+            
+            stories.forEach(story => {
+                const assignee = story.assignee ? ENGINEERS.find(e => e.id === story.assignee) : null;
+                
+                html += `
+                    <div class="story-card" data-status="${story.status}" data-story-id="${story.id}">
+                        <div class="story-header">
+                            <span><strong>${story.id}</strong> - ${story.title}</span>
+                            <span>
+                                <span class="tech-badge">${story.techStack}</span>
+                                <i class="fas fa-user"></i> ${assignee ? assignee.name : 'Unassigned'}
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span><i class="fas fa-file"></i> ${story.file}</span>
+                            <span><i class="fas fa-chart-simple"></i> ${story.points} pts</span>
+                        </div>
+                        ${story.status === 'in-progress' ? `
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${story.progress}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            updateStats();
+        }
+
+        function renderKanbanBoards() {
+            const grid = document.getElementById('kanbanGrid');
+            let html = '';
+            
+            ENGINEERS.forEach(eng => {
+                const tasks = engineerTasks[eng.id] || [];
+                const todo = tasks.filter(t => t.status === 'todo');
+                const inProgress = tasks.filter(t => t.status === 'in-progress');
+                const review = tasks.filter(t => t.status === 'review');
+                const done = tasks.filter(t => t.status === 'done');
+                
+                html += `
+                    <div class="agent-kanban">
+                        <div class="agent-header">
+                            <div class="agent-icon ${inProgress.length > 0 ? 'working' : ''}" style="background: ${eng.color}">
+                                ${eng.short}
+                            </div>
+                            <div style="flex: 1;">
+                                <div><strong>${eng.name}</strong></div>
+                                <div style="font-size: 0.7rem; opacity: 0.9;">${eng.role}</div>
+                                <div class="expertise-tag">${eng.techStack}</div>
+                            </div>
+                            <div style="font-size: 0.7rem; text-align: right;">
+                                ${tasks.length} tasks
+                            </div>
+                        </div>
+                        <div class="kanban-columns">
+                            <div class="kanban-col">
+                                <div style="font-size: 0.65rem; margin-bottom: 5px;">📋 TODO</div>
+                                ${todo.map(t => renderTaskCard(t)).join('')}
+                            </div>
+                            <div class="kanban-col">
+                                <div style="font-size: 0.65rem; margin-bottom: 5px;">⚡ IN PROGRESS</div>
+                                ${inProgress.map(t => renderTaskCard(t)).join('')}
+                            </div>
+                            <div class="kanban-col">
+                                <div style="font-size: 0.65rem; margin-bottom: 5px;">🔍 REVIEW</div>
+                                ${review.map(t => renderTaskCard(t)).join('')}
+                            </div>
+                            <div class="kanban-col">
+                                <div style="font-size: 0.65rem; margin-bottom: 5px;">✅ DONE</div>
+                                ${done.map(t => renderTaskCard(t)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function renderTaskCard(task) {
+            return `
+                <div class="task-card" data-status="${task.status}" data-task-id="${task.id}">
+                    <div><strong>${task.storyId}</strong></div>
+                    <div style="font-size: 0.65rem;">${task.title.substring(0, 25)}...</div>
+                    ${task.prNumber ? `<div style="font-size: 0.6rem; margin-top: 3px;">🔀 PR #${task.prNumber}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderEngineerSelector() {
+            const selector = document.getElementById('engineerSelector');
+            selector.innerHTML = ENGINEERS.map(eng => `
+                <button class="engineer-btn ${selectedEngineer === eng.id ? 'active' : ''}" 
+                        data-engineer="${eng.id}" 
+                        style="background: ${selectedEngineer === eng.id ? eng.color : '#1a2744'}">
+                    ${eng.short}
+                </button>
+            `).join('');
+            
+            document.querySelectorAll('.engineer-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedEngineer = btn.dataset.engineer;
+                    renderEngineerSelector();
+                    renderCodeEditor();
+                    const eng = ENGINEERS.find(e => e.id === selectedEngineer);
+                    document.getElementById('currentFile').textContent = `${eng.name} · ${eng.techStack}`;
+                });
+            });
+        }
+
+        function renderCodeEditor() {
+            const editor = document.getElementById('codeEditor');
+            const eng = ENGINEERS.find(e => e.id === selectedEngineer);
+            const files = codeFiles[selectedEngineer];
+            
+            if (!files) {
+                editor.innerHTML = '<div style="color: #4a6a8a; text-align: center; padding: 40px;">No active files</div>';
+                return;
+            }
+            
+            const firstFile = Object.keys(files)[0];
+            const content = files[firstFile];
+            const lines = content.split('\n');
+            
+            let html = `<div style="margin-bottom: 10px; color: #60a5fa;">📁 ${firstFile}</div>`;
+            lines.forEach((line, index) => {
+                html += `<div class="code-line">`;
+                html += `<span class="line-number">${index + 1}</span>`;
+                html += `<span class="line-content">${escapeHtml(line)}</span>`;
+                html += '</div>';
+            });
+            
+            editor.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ---------- SIMULATION LOGIC ----------
+        function assignTasksByExpertise() {
+            const unassigned = stories.filter(s => !s.assignee && s.status === 'backlog');
+            
+            unassigned.forEach(story => {
+                const bestEngineer = findBestEngineerForStory(story);
+                
+                if (bestEngineer) {
+                    story.assignee = bestEngineer.id;
+                    story.status = 'todo';
+                    
+                    const task = {
+                        id: `task-${Date.now()}-${Math.random()}`,
+                        storyId: story.id,
+                        title: story.title,
+                        status: 'todo',
+                        file: story.file
+                    };
+                    
+                    engineerTasks[bestEngineer.id].push(task);
+                    addLog(`📋 ${story.id} (${story.techStack}) assigned to ${bestEngineer.name} based on expertise`, 'fa-arrow-right');
+                }
+            });
+            
+            renderScrumBoard();
+            renderKanbanBoards();
+        }
+
+        function cloneRepository(engineerId) {
+            const eng = ENGINEERS.find(e => e.id === engineerId);
+            if (eng.repo) return;
+            
+            eng.repo = `~/workspace/${eng.name.toLowerCase().replace(' ', '-')}-repo`;
+            addLog(`📦 ${eng.name} cloned repository for ${eng.techStack} development`, 'fa-code-branch');
+            
+            const terminal = document.getElementById('terminal');
+            const lines = terminal.innerHTML.split('<br>');
+            lines.push(`<div class="terminal-line">$ ${eng.name}: git clone ${eng.repo}</div>`);
+            if (lines.length > 6) lines.shift();
+            terminal.innerHTML = lines.join('');
+        }
+
+        function processEngineerTask(engineerId) {
+            const eng = ENGINEERS.find(e => e.id === engineerId);
+            const tasks = engineerTasks[engineerId];
+            
+            // Clone repo if needed
+            if (tasks.length > 0 && !eng.repo) {
+                cloneRepository(engineerId);
+            }
+            
+            // Move todo -> in-progress
+            const todoTask = tasks.find(t => t.status === 'todo');
+            if (todoTask) {
+                todoTask.status = 'in-progress';
+                const story = stories.find(s => s.id === todoTask.storyId);
+                story.status = 'in-progress';
+                story.progress = 15;
+                
+                addLog(`🚀 ${eng.name} started ${todoTask.storyId} · Creating branch 'feature/${todoTask.storyId}'`, 'fa-play');
+                
+                // Simulate work progress
+                setTimeout(() => {
+                    story.progress = 45;
+                    renderScrumBoard();
+                    addLog(`🔍 ${eng.name} analyzing ${story.file} for bugs`, 'fa-search');
+                    
+                    setTimeout(() => {
+                        story.progress = 75;
+                        renderScrumBoard();
+                        addLog(`🔧 ${eng.name} fixed bug in ${story.file}`, 'fa-wrench');
+                        
+                        setTimeout(() => {
+                            const commitHash = Math.random().toString(36).substr(2, 7);
+                            todoTask.commitHash = commitHash;
+                            todoTask.prNumber = Math.floor(Math.random() * 500) + 100;
+                            
+                            addLog(`💾 ${eng.name} committed: ${commitHash} · Pushed to origin`, 'fa-code-commit');
+                            
+                            setTimeout(() => {
+                                todoTask.status = 'review';
+                                story.status = 'review';
+                                story.progress = 90;
+                                addLog(`🔀 ${eng.name} created PR #${todoTask.prNumber} · Waiting approval`, 'fa-code-pull-request');
+                                
+                                renderScrumBoard();
+                                renderKanbanBoards();
+                                
+                                // Brijesh approves
+                                setTimeout(() => {
+                                    if (Math.random() > 0.15) {
+                                        todoTask.status = 'done';
+                                        story.status = 'done';
+                                        story.progress = 100;
+                                        addLog(`✅ Brijesh APPROVED PR #${todoTask.prNumber} · ${story.id} completed`, 'fa-check-circle');
+                                    } else {
+                                        addLog(`⚠️ Changes requested on PR #${todoTask.prNumber}`, 'fa-undo');
+                                        todoTask.status = 'in-progress';
+                                        story.progress = 60;
+                                    }
+                                    
+                                    renderScrumBoard();
+                                    renderKanbanBoards();
+                                    updateStats();
+                                }, 2000);
+                            }, 1500);
+                        }, 2000);
+                    }, 2000);
+                }, 2000);
+            }
+            
+            renderKanbanBoards();
+            updateStats();
+        }
+
+        function simulationStep() {
+            if (!isRunning) return;
+            
+            // Assign any unassigned tasks
+            assignTasksByExpertise();
+            
+            // Process each engineer's tasks (all work simultaneously)
+            ENGINEERS.forEach(eng => {
+                const hasInProgress = engineerTasks[eng.id].some(t => t.status === 'in-progress');
+                if (!hasInProgress) {
+                    processEngineerTask(eng.id);
+                }
+            });
+            
+            // Update terminal with status
+            const terminal = document.getElementById('terminal');
+            const activeEngineers = ENGINEERS.filter(e => 
+                engineerTasks[e.id].some(t => t.status === 'in-progress')
+            );
+            
+            if (activeEngineers.length > 0) {
+                const lines = terminal.innerHTML.split('<br>');
+                lines.push(`<div class="terminal-line">$ ${activeEngineers.length} engineers actively working...</div>`);
+                if (lines.length > 6) lines.shift();
+                terminal.innerHTML = lines.join('');
+            }
+        }
+
+        // ---------- CONTROLS ----------
+        function startSimulation() {
+            isRunning = true;
+            simulationInterval = setInterval(simulationStep, simulationSpeed);
+            document.getElementById('startSimulation').disabled = true;
+            document.getElementById('stopSimulation').disabled = false;
+            document.getElementById('simulationStatus').textContent = '🟢 All Engineers Working';
+            addLog('🤖 All engineers started · Working simultaneously on assigned tasks', 'fa-play');
+            simulationStep();
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            clearInterval(simulationInterval);
+            document.getElementById('startSimulation').disabled = false;
+            document.getElementById('stopSimulation').disabled = true;
+            document.getElementById('simulationStatus').textContent = '⏸️ Paused';
+            addLog('⏸️ Simulation paused', 'fa-pause');
+        }
+
+        function resetSimulation() {
+            stopSimulation();
+            
+            stories.forEach(s => {
+                s.assignee = null;
+                s.status = 'backlog';
+                s.progress = 0;
+            });
+            
+            ENGINEERS.forEach(e => {
+                engineerTasks[e.id] = [];
+                e.repo = null;
+            });
+            
+            document.getElementById('terminal').innerHTML = `
+                <div class="terminal-line">$ System reset · All engineers ready</div>
+                <div class="terminal-line">$ Waiting for task assignment...</div>
+            `;
+            
+            renderScrumBoard();
+            renderKanbanBoards();
+            renderCodeEditor();
+            updateStats();
+            
+            addLog('🔄 Simulation reset · All tasks cleared', 'fa-rotate-left');
+        }
+
+        // ---------- INITIALIZATION ----------
+        function initialize() {
+            renderEngineerSelector();
+            renderScrumBoard();
+            renderKanbanBoards();
+            updateStats();
+            
+            // Pre-assign some tasks for demo
+            setTimeout(() => {
+                assignTasksByExpertise();
+            }, 500);
+            
+            // Event listeners
+            document.getElementById('startSimulation').addEventListener('click', startSimulation);
+            document.getElementById('stopSimulation').addEventListener('click', stopSimulation);
+            document.getElementById('resetSimulation').addEventListener('click', resetSimulation);
+            document.getElementById('assignAllTasks').addEventListener('click', assignTasksByExpertise);
+            
+            // Initialize activity log
+            const container = document.getElementById('activityLog');
+            container.innerHTML = activityLogs.slice().reverse().map(log => `
+                <div class="log-entry">
+                    <span style="color: #60a5fa;">[${log.time}]</span>
+                    <span><i class="fas ${log.icon}"></i> ${log.message}</span>
+                </div>
+            `).join('');
+            
+            addLog('👥 Engineers ready: Aarav (MERN), Priya (Python), Rohan (React), Meera (DevOps), Vikram (Security)', 'fa-users');
+        }
+
+        initialize();
+    })();
+</script>
+</body>
+</html>
