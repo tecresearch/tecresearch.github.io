@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 VIRTUAL ENGINEER AI · Full Autonomous Multi-Agent DevOps</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #151e30 100%);
+            color: #e8edff;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        .dashboard {
+            max-width: 2400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px 25px;
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            border: 1px solid #2a4a7a;
+        }
+
+        .title-section h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #a8c0ff, #3f6ef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .team-leader-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(59, 130, 246, 0.15);
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid #3b82f6;
+        }
+
+        .leader-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid #2a4a7a;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #60a5fa;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px #1e3a8a80;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        /* Scrum Board */
+        .scrum-section {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a4a7a;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .story-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .story-card {
+            background: linear-gradient(135deg, #1e2a4a, #152038);
+            border-radius: 14px;
+            padding: 12px 16px;
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+
+        .story-card[data-status="backlog"] { border-left-color: #64748b; }
+        .story-card[data-status="todo"] { border-left-color: #3b82f6; }
+        .story-card[data-status="in-progress"] { border-left-color: #f59e0b; }
+        .story-card[data-status="review"] { border-left-color: #8b5cf6; }
+        .story-card[data-status="done"] { border-left-color: #10b981; opacity: 0.7; }
+
+        .story-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            font-size: 0.7rem;
+            margin-right: 4px;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: #1e3a5f;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        /* Code Editor Panel */
+        .editor-section {
+            background: #0d1421;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #2a4a7a;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a4a7a;
+        }
+
+        .engineer-selector {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        .engineer-btn {
+            padding: 5px 10px;
+            background: #1a2744;
+            border: none;
+            color: white;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .engineer-btn.active {
+            background: #3b82f6;
+        }
+
+        .code-container {
+            flex: 1;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: #0a0e1a;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 1px 0;
+            position: relative;
+        }
+
+        .line-number {
+            width: 35px;
+            color: #4a6a8a;
+            text-align: right;
+            padding-right: 12px;
+            user-select: none;
+        }
+
+        .line-content {
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .bug-highlight {
+            background: rgba(239, 68, 68, 0.3);
+            border-left: 3px solid #ef4444;
+            animation: bugPulse 1.5s infinite;
+        }
+
+        .fix-highlight {
+            background: rgba(16, 185, 129, 0.3);
+            border-left: 3px solid #10b981;
+            animation: fixPulse 1s;
+        }
+
+        @keyframes bugPulse {
+            0%, 100% { background: rgba(239, 68, 68, 0.2); }
+            50% { background: rgba(239, 68, 68, 0.4); }
+        }
+
+        @keyframes fixPulse {
+            0% { background: rgba(16, 185, 129, 0.1); }
+            50% { background: rgba(16, 185, 129, 0.5); }
+            100% { background: rgba(16, 185, 129, 0.3); }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: #60a5fa;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .terminal-output {
+            background: #0a0e1a;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            color: #10b981;
+            padding: 1px 0;
+        }
+
+        /* Kanban Grid */
+        .kanban-section {
+            margin-top: 15px;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .agent-kanban {
+            background: rgba(12, 22, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid #2e4b8a;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .agent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            position: relative;
+            font-size: 1rem;
+        }
+
+        .agent-icon.working::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            bottom: -2px;
+            right: -2px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .expertise-tag {
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-top: 2px;
+        }
+
+        .kanban-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3px;
+        }
+
+        .kanban-col {
+            background: #0a1222;
+            border-radius: 10px;
+            padding: 6px 3px;
+            min-height: 100px;
+        }
+
+        .task-card {
+            background: #1a2744;
+            margin-bottom: 4px;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            border-left: 2px solid;
+            transition: all 0.3s;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .task-card[data-status="todo"] { border-left-color: #64748b; }
+        .task-card[data-status="in-progress"] { border-left-color: #f59e0b; }
+        .task-card[data-status="review"] { border-left-color: #8b5cf6; }
+        .task-card[data-status="done"] { border-left-color: #10b981; }
+
+        /* Activity Log */
+        .activity-feed {
+            background: #0a1222e0;
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #2a4a7a;
+            margin-top: 15px;
+        }
+
+        .log-container {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #1e3a5f;
+            display: flex;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+        <div class="title-section">
+            <h1><i class="fas fa-robot" style="margin-right: 8px;"></i>VIRTUAL ENGINEER AI · Autonomous Multi-Agent</h1>
+            <div style="font-size: 0.8rem; opacity: 0.8;">
+                <i class="fas fa-users"></i> 5 Engineers · Real-time Bug Fixing · Auto PR Approval
+            </div>
+        </div>
+        <div class="team-leader-card">
+            <div class="leader-avatar">BN</div>
+            <div>
+                <h3>Brijesh Nishad</h3>
+                <p style="font-size: 0.7rem;"><i class="fas fa-crown" style="color: #fbbf24;"></i> Lead · Auto Approver</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="totalStories">25</div>
+            <div class="stat-label">Total Stories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="inProgressStories">0</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="reviewStories">0</div>
+            <div class="stat-label">In Review</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="doneStories">0</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="activeEngineers">0</div>
+            <div class="stat-label">Active Engineers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="bugsFixed">0</div>
+            <div class="stat-label">Bugs Fixed</div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <button class="btn" id="startSimulation">
+            <i class="fas fa-play"></i> Start All Engineers
+        </button>
+        <button class="btn" id="stopSimulation" style="background: #4a5568;" disabled>
+            <i class="fas fa-stop"></i> Pause
+        </button>
+        <button class="btn" id="resetSimulation" style="background: #6b7280;">
+            <i class="fas fa-rotate-left"></i> Reset
+        </button>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+            <span style="color: #60a5fa;" id="simulationStatus">Ready · Click Start</span>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+        <!-- Scrum Board -->
+        <div class="scrum-section">
+            <h3 style="margin-bottom: 12px; font-size: 1rem;"><i class="fas fa-tasks"></i> Scrum Board</h3>
+            <div class="story-list" id="scrumBoard"></div>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="editor-section">
+            <div class="editor-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-code"></i>
+                    <span id="currentFile" style="font-size: 0.9rem;">Select engineer →</span>
+                </div>
+                <div class="engineer-selector" id="engineerSelector"></div>
+            </div>
+            <div class="code-container" id="codeEditor">
+                <div style="color: #4a6a8a; text-align: center; padding: 30px;">
+                    <i class="fas fa-user-cog" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                    <br>Select an engineer to view real-time coding
+                </div>
+            </div>
+            <div class="terminal-output" id="terminal">
+                <div class="terminal-line">$ System ready · 5 engineers with specialized tech stacks</div>
+                <div class="terminal-line">$ Auto-assignment based on expertise enabled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engineers Kanban Grid -->
+    <div class="kanban-section">
+        <h3 style="margin-bottom: 8px; font-size: 1rem;"><i class="fas fa-users-gear"></i> Virtual Engineers · Live Workspaces</h3>
+        <div class="agents-grid" id="kanbanGrid"></div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="activity-feed">
+        <h3 style="margin-bottom: 10px; font-size: 0.9rem;"><i class="fas fa-terminal"></i> Real-time DevOps Activity</h3>
+        <div class="log-container" id="activityLog"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- ENGINEERS WITH EXPERTISE ----------
+        const ENGINEERS = [
+            { id: 'eng1', name: 'Aarav Kapoor', short: 'AK', color: '#3b82f6', role: 'Full-stack', expertise: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'GraphQL'], techStack: 'MERN', repo: null, currentFile: 'graphql/resolvers.js' },
+            { id: 'eng2', name: 'Priya Menon', short: 'PM', color: '#8b5cf6', role: 'Backend', expertise: ['Python', 'Django', 'PostgreSQL', 'Redis'], techStack: 'Python/Django', repo: null, currentFile: 'models.py' },
+            { id: 'eng3', name: 'Rohan Desai', short: 'RD', color: '#f59e0b', role: 'Frontend', expertise: ['React', 'Vue.js', 'Tailwind', 'Webpack'], techStack: 'React/Vue', repo: null, currentFile: 'components/DataTable.jsx' },
+            { id: 'eng4', name: 'Meera Iyer', short: 'MI', color: '#10b981', role: 'DevOps', expertise: ['Docker', 'Kubernetes', 'AWS', 'Terraform'], techStack: 'DevOps/AWS', repo: null, currentFile: 'Dockerfile' },
+            { id: 'eng5', name: 'Vikram Singh', short: 'VS', color: '#ef4444', role: 'QA/Security', expertise: ['Testing', 'Security', 'Cypress', 'Jest'], techStack: 'QA/Security', repo: null, currentFile: 'utils/sanitizer.js' }
+        ];
+
+        // Stories with tech stack - 5 per engineer = 25 total
+        let stories = [
+            // Aarav (MERN)
+            { id: 'ST-101', title: 'Implement GraphQL user resolver', points: 5, techStack: 'GraphQL', file: 'graphql/resolvers.js', bugLine: 15, bugDesc: 'Missing error handling', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-102', title: 'Fix MongoDB aggregation pipeline', points: 3, techStack: 'MongoDB', file: 'services/userService.js', bugLine: 23, bugDesc: 'Inefficient $lookup', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-103', title: 'Add TypeScript types to API', points: 3, techStack: 'TypeScript', file: 'types/api.ts', bugLine: 8, bugDesc: 'Missing proper typing', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-104', title: 'Optimize React component re-renders', points: 3, techStack: 'React', file: 'components/UserList.jsx', bugLine: 12, bugDesc: 'Missing useMemo', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-105', title: 'Implement JWT refresh token', points: 5, techStack: 'Node.js', file: 'middleware/auth.js', bugLine: 25, bugDesc: 'Token not refreshed', assignee: null, status: 'backlog', progress: 0 },
+            
+            // Priya (Python/Django)
+            { id: 'ST-201', title: 'Optimize Django ORM queries', points: 5, techStack: 'Django', file: 'models.py', bugLine: 42, bugDesc: 'N+1 query problem', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-202', title: 'Implement Redis caching', points: 5, techStack: 'Redis', file: 'cache/redis_client.py', bugLine: 18, bugDesc: 'No connection pool', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-203', title: 'Fix PostgreSQL connection leak', points: 3, techStack: 'PostgreSQL', file: 'db/connection.py', bugLine: 31, bugDesc: 'Pool not configured', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-204', title: 'Add async task processing', points: 5, techStack: 'Python', file: 'tasks/worker.py', bugLine: 10, bugDesc: 'Blocking I/O', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-205', title: 'Implement API rate limiting', points: 3, techStack: 'Django', file: 'middleware/throttle.py', bugLine: 15, bugDesc: 'Too permissive', assignee: null, status: 'backlog', progress: 0 },
+            
+            // Rohan (React/Vue)
+            { id: 'ST-301', title: 'Create reusable DataTable', points: 3, techStack: 'React', file: 'components/DataTable.jsx', bugLine: 12, bugDesc: 'Mutates original data', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-302', title: 'Implement Tailwind dark mode', points: 2, techStack: 'Tailwind', file: 'tailwind.config.js', bugLine: 7, bugDesc: 'Dark mode not configured', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-303', title: 'Fix Webpack code splitting', points: 3, techStack: 'Webpack', file: 'webpack.config.js', bugLine: 45, bugDesc: 'No optimization', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-304', title: 'Add Vue 3 Composition API', points: 3, techStack: 'Vue.js', file: 'components/TodoList.vue', bugLine: 20, bugDesc: 'Reactivity issue', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-305', title: 'Optimize bundle size', points: 5, techStack: 'Webpack', file: 'webpack.prod.js', bugLine: 30, bugDesc: 'Large vendor bundle', assignee: null, status: 'backlog', progress: 0 },
+            
+            // Meera (DevOps)
+            { id: 'ST-401', title: 'Optimize Docker multi-stage', points: 3, techStack: 'Docker', file: 'Dockerfile', bugLine: 10, bugDesc: 'No multi-stage', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-402', title: 'Configure K8s HPA', points: 5, techStack: 'Kubernetes', file: 'k8s/hpa.yaml', bugLine: 22, bugDesc: 'Missing metrics', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-403', title: 'Setup AWS CloudFront', points: 3, techStack: 'AWS', file: 'terraform/cdn.tf', bugLine: 15, bugDesc: 'No cache behavior', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-404', title: 'Implement Terraform state', points: 3, techStack: 'Terraform', file: 'terraform/backend.tf', bugLine: 5, bugDesc: 'Local state only', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-405', title: 'Add CI/CD pipeline', points: 5, techStack: 'CI/CD', file: '.github/workflows/deploy.yml', bugLine: 12, bugDesc: 'Missing tests', assignee: null, status: 'backlog', progress: 0 },
+            
+            // Vikram (QA/Security)
+            { id: 'ST-501', title: 'Fix XSS vulnerability', points: 5, techStack: 'Security', file: 'utils/sanitizer.js', bugLine: 8, bugDesc: 'Incomplete sanitization', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-502', title: 'Add rate limiting', points: 3, techStack: 'Security', file: 'middleware/rateLimit.js', bugLine: 14, bugDesc: 'Too permissive', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-503', title: 'Write Cypress E2E tests', points: 5, techStack: 'Cypress', file: 'cypress/e2e/checkout.cy.js', bugLine: 20, bugDesc: 'No assertions', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-504', title: 'Fix SQL injection', points: 5, techStack: 'Security', file: 'api/users.js', bugLine: 35, bugDesc: 'Unsanitized input', assignee: null, status: 'backlog', progress: 0 },
+            { id: 'ST-505', title: 'Add Jest unit tests', points: 3, techStack: 'Jest', file: '__tests__/auth.test.js', bugLine: 10, bugDesc: 'Missing coverage', assignee: null, status: 'backlog', progress: 0 }
+        ];
+
+        // Code files with bugs
+        const codeFiles = {
+            'eng1': {
+                'graphql/resolvers.js': `import { User } from '../models';\n\nexport const resolvers = {\n  Query: {\n    users: async () => {\n      // BUG: Missing error handling\n      return await User.find();\n    },\n    user: async (_, { id }) => {\n      return await User.findById(id);\n    }\n  }\n};`,
+                'services/userService.js': `export class UserService {\n  async getUsersWithPosts() {\n    // BUG: Inefficient $lookup\n    return await User.aggregate([\n      { $lookup: {\n        from: 'posts',\n        localField: '_id',\n        foreignField: 'userId',\n        as: 'posts'\n      }}\n    ]);\n  }\n}`,
+                'types/api.ts': `interface User {\n  id: string;\n  email: string;\n}\n\n// BUG: Missing proper typing\nexport type ApiResponse = {\n  data: any;\n};`
+            },
+            'eng2': {
+                'models.py': `class User(models.Model):\n    email = models.EmailField()\n\ndef get_user_orders(user_id):\n    # BUG: N+1 query\n    user = User.objects.get(id=user_id)\n    return user.order_set.all()`,
+                'cache/redis_client.py': `import redis\n\n# BUG: No connection pool\nredis_client = redis.Redis(host='localhost', port=6379)`,
+                'db/connection.py': `import psycopg2\n\n# BUG: Pool not configured\nconnection_pool = psycopg2.pool.SimpleConnectionPool(1, 20, database="mydb")`
+            },
+            'eng3': {
+                'components/DataTable.jsx': `export const DataTable = ({ data }) => {\n  // BUG: Mutates original data\n  const sortedData = data.sort((a, b) => a.id - b.id);\n  return <table>{sortedData.map(row => <tr>...</tr>)}</table>;\n};`,
+                'tailwind.config.js': `module.exports = {\n  content: ['./src/**/*.{js,jsx}'],\n  // BUG: Dark mode not configured\n  theme: { extend: {} }\n};`,
+                'webpack.config.js': `module.exports = {\n  entry: './src/index.js',\n  // BUG: No optimization\n  optimization: {}\n};`
+            },
+            'eng4': {
+                'Dockerfile': `FROM node:16\nWORKDIR /app\nCOPY . .\nRUN npm install\n# BUG: No multi-stage\nCMD ["node", "server.js"]`,
+                'k8s/hpa.yaml': `apiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nspec:\n  # BUG: Missing metrics\n  maxReplicas: 10`,
+                'terraform/cdn.tf': `resource "aws_cloudfront_distribution" "cdn" {\n  origin { domain_name = "bucket" }\n  # BUG: No cache behavior\n  enabled = true\n}`
+            },
+            'eng5': {
+                'utils/sanitizer.js': `export function sanitizeInput(input) {\n  // BUG: Incomplete XSS protection\n  return input.replace(/<script>/gi, '');\n}`,
+                'middleware/rateLimit.js': `export const limiter = rateLimit({\n  windowMs: 15 * 60 * 1000,\n  // BUG: Too permissive\n  max: 1000\n});`,
+                'cypress/e2e/checkout.cy.js': `describe('Checkout', () => {\n  it('should complete purchase', () => {\n    cy.visit('/checkout');\n    // BUG: No assertions\n    cy.get('#submit').click();\n  });\n});`
+            }
+        };
+
+        let engineerTasks = {};
+        ENGINEERS.forEach(e => { engineerTasks[e.id] = []; });
+
+        let activityLogs = [
+            { time: '09:00:00', message: '🤖 Multi-agent system initialized with 5 engineers', icon: 'fa-robot' },
+            { time: '09:00:03', message: '👔 Brijesh Nishad online - Auto task assignment & PR approval', icon: 'fa-user-tie' },
+            { time: '09:00:05', message: '📋 25 stories ready - 5 per engineer based on expertise', icon: 'fa-tasks' }
+        ];
+
+        let isRunning = false;
+        let simulationInterval = null;
+        let selectedEngineer = 'eng1';
+        let bugsFixedCount = 0;
+        let typingTimeouts = {};
+
+        // ---------- HELPER FUNCTIONS ----------
+        function findBestEngineerForStory(story) {
+            return ENGINEERS.find(eng => 
+                eng.expertise.some(exp => story.techStack.toLowerCase().includes(exp.toLowerCase()))
+            );
+        }
+
+        function addLog(message, icon = 'fa-info-circle') {
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            activityLogs.push({ time, message, icon });
+            if (activityLogs.length > 25) activityLogs.shift();
+            
+            const container = document.getElementById('activityLog');
+            container.innerHTML = activityLogs.slice().reverse().map(log => `
+                <div class="log-entry">
+                    <span style="color: #60a5fa;">[${log.time}]</span>
+                    <span><i class="fas ${log.icon}"></i> ${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalStories').textContent = stories.length;
+            document.getElementById('inProgressStories').textContent = stories.filter(s => s.status === 'in-progress').length;
+            document.getElementById('reviewStories').textContent = stories.filter(s => s.status === 'review').length;
+            document.getElementById('doneStories').textContent = stories.filter(s => s.status === 'done').length;
+            document.getElementById('activeEngineers').textContent = ENGINEERS.filter(e => 
+                engineerTasks[e.id].some(t => t.status === 'in-progress')
+            ).length;
+            document.getElementById('bugsFixed').textContent = bugsFixedCount;
+        }
+
+        // ---------- RENDER FUNCTIONS ----------
+        function renderScrumBoard() {
+            const container = document.getElementById('scrumBoard');
+            let html = '';
+            
+            stories.sort((a, b) => {
+                const statusOrder = { 'in-progress': 1, 'review': 2, 'todo': 3, 'backlog': 4, 'done': 5 };
+                return statusOrder[a.status] - statusOrder[b.status];
+            }).forEach(story => {
+                const assignee = story.assignee ? ENGINEERS.find(e => e.id === story.assignee) : null;
+                
+                html += `
+                    <div class="story-card" data-status="${story.status}" data-story-id="${story.id}">
+                        <div class="story-header">
+                            <span><strong>${story.id}</strong> - ${story.title}</span>
+                            <span>
+                                <span class="tech-badge">${story.techStack}</span>
+                                ${assignee ? assignee.short : '⚪'}
+                            </span>
+                        </div>
+                        ${story.status === 'in-progress' ? `
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${story.progress}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            updateStats();
+        }
+
+        function renderKanbanBoards() {
+            const grid = document.getElementById('kanbanGrid');
+            let html = '';
+            
+            ENGINEERS.forEach(eng => {
+                const tasks = engineerTasks[eng.id] || [];
+                const todo = tasks.filter(t => t.status === 'todo');
+                const inProgress = tasks.filter(t => t.status === 'in-progress');
+                const review = tasks.filter(t => t.status === 'review');
+                const done = tasks.filter(t => t.status === 'done');
+                
+                html += `
+                    <div class="agent-kanban">
+                        <div class="agent-header">
+                            <div class="agent-icon ${inProgress.length > 0 ? 'working' : ''}" style="background: ${eng.color}">
+                                ${eng.short}
+                            </div>
+                            <div style="flex: 1;">
+                                <div><strong>${eng.name.split(' ')[0]}</strong></div>
+                                <div class="expertise-tag">${eng.techStack}</div>
+                            </div>
+                            <div style="font-size: 0.65rem;">${tasks.length}</div>
+                        </div>
+                        <div class="kanban-columns">
+                            <div class="kanban-col">${todo.map(t => renderTaskCard(t)).join('')}</div>
+                            <div class="kanban-col">${inProgress.map(t => renderTaskCard(t)).join('')}</div>
+                            <div class="kanban-col">${review.map(t => renderTaskCard(t)).join('')}</div>
+                            <div class="kanban-col">${done.map(t => renderTaskCard(t)).join('')}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function renderTaskCard(task) {
+            return `<div class="task-card" data-status="${task.status}">${task.storyId}</div>`;
+        }
+
+        function renderEngineerSelector() {
+            const selector = document.getElementById('engineerSelector');
+            selector.innerHTML = ENGINEERS.map(eng => `
+                <button class="engineer-btn ${selectedEngineer === eng.id ? 'active' : ''}" 
+                        data-engineer="${eng.id}" 
+                        style="background: ${selectedEngineer === eng.id ? eng.color : '#1a2744'}">
+                    ${eng.short}
+                </button>
+            `).join('');
+            
+            document.querySelectorAll('.engineer-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedEngineer = btn.dataset.engineer;
+                    renderEngineerSelector();
+                    renderCodeEditor();
+                    const eng = ENGINEERS.find(e => e.id === selectedEngineer);
+                    document.getElementById('currentFile').textContent = `${eng.name} · ${eng.currentFile}`;
+                });
+            });
+        }
+
+        function renderCodeEditor() {
+            const editor = document.getElementById('codeEditor');
+            const eng = ENGINEERS.find(e => e.id === selectedEngineer);
+            const files = codeFiles[selectedEngineer];
+            
+            if (!files) return;
+            
+            const activeFile = eng.currentFile || Object.keys(files)[0];
+            const content = files[activeFile];
+            const lines = content.split('\n');
+            
+            // Find active bug for this engineer
+            const activeTask = engineerTasks[selectedEngineer].find(t => t.status === 'in-progress');
+            const activeStory = activeTask ? stories.find(s => s.id === activeTask.storyId) : null;
+            
+            let html = `<div style="margin-bottom: 8px; color: #60a5fa; font-size: 0.85rem;">📁 ${activeFile}</div>`;
+            lines.forEach((line, index) => {
+                const lineNum = index + 1;
+                const isBugLine = activeStory && activeStory.file === activeFile && activeStory.bugLine === lineNum;
+                const isFixed = activeStory && activeStory.status === 'done' && activeStory.bugLine === lineNum;
+                
+                let lineClass = '';
+                if (isFixed) lineClass = 'fix-highlight';
+                else if (isBugLine) lineClass = 'bug-highlight';
+                
+                html += `<div class="code-line ${lineClass}">`;
+                html += `<span class="line-number">${lineNum}</span>`;
+                html += `<span class="line-content">${escapeHtml(line)}</span>`;
+                
+                if (isBugLine && !isFixed) {
+                    html += `<span style="color: #ef4444; margin-left: 8px; font-size: 0.7rem;">🐛 ${activeStory.bugDesc}</span>`;
+                } else if (isFixed) {
+                    html += `<span style="color: #10b981; margin-left: 8px; font-size: 0.7rem;">✅ FIXED</span>`;
+                }
+                
+                html += '</div>';
+            });
+            
+            editor.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ---------- TYPING ANIMATION ----------
+        function simulateTyping(engineerId, file, newContent, callback) {
+            const eng = ENGINEERS.find(e => e.id === engineerId);
+            const lines = newContent.split('\n');
+            let currentLine = 0;
+            let currentChar = 0;
+            
+            codeFiles[engineerId][file] = '';
+            
+            const typeInterval = setInterval(() => {
+                if (currentLine < lines.length) {
+                    if (currentChar < lines[currentLine].length) {
+                        codeFiles[engineerId][file] += lines[currentLine][currentChar];
+                        currentChar++;
+                    } else {
+                        codeFiles[engineerId][file] += '\n';
+                        currentLine++;
+                        currentChar = 0;
+                    }
+                    
+                    if (selectedEngineer === engineerId) {
+                        renderCodeEditor();
+                    }
+                } else {
+                    clearInterval(typeInterval);
+                    if (callback) callback();
+                }
+            }, 20);
+            
+            typingTimeouts[engineerId] = typeInterval;
+        }
+
+        // ---------- SIMULATION LOGIC ----------
+        function assignTasksByExpertise() {
+            const unassigned = stories.filter(s => !s.assignee && s.status === 'backlog');
+            
+            unassigned.forEach(story => {
+                const bestEngineer = findBestEngineerForStory(story);
+                
+                if (bestEngineer) {
+                    story.assignee = bestEngineer.id;
+                    story.status = 'todo';
+                    
+                    const task = {
+                        id: `task-${Date.now()}-${Math.random()}`,
+                        storyId: story.id,
+                        title: story.title,
+                        status: 'todo',
+                        file: story.file
+                    };
+                    
+                    engineerTasks[bestEngineer.id].push(task);
+                    addLog(`📋 ${story.id} (${story.techStack}) → ${bestEngineer.name}`, 'fa-arrow-right');
+                }
+            });
+            
+            renderScrumBoard();
+            renderKanbanBoards();
+        }
+
+        function cloneRepository(engineerId) {
+            const eng = ENGINEERS.find(e => e.id === engineerId);
+            if (eng.repo) return;
+            
+            eng.repo = `~/workspace/${eng.name.toLowerCase().replace(' ', '-')}-repo`;
+            addLog(`📦 ${eng.name} cloned ${eng.techStack} repo`, 'fa-code-branch');
+        }
+
+        function processEngineerTask(engineerId) {
+            const eng = ENGINEERS.find(e => e.id === engineerId);
+            const tasks = engineerTasks[engineerId];
+            
+            if (tasks.length > 0 && !eng.repo) {
+                cloneRepository(engineerId);
+            }
+            
+            const todoTask = tasks.find(t => t.status === 'todo');
+            if (!todoTask) return;
+            
+            // Start task
+            todoTask.status = 'in-progress';
+            const story = stories.find(s => s.id === todoTask.storyId);
+            story.status = 'in-progress';
+            story.progress = 10;
+            
+            addLog(`🚀 ${eng.name} started ${todoTask.storyId} · ${story.techStack}`, 'fa-play');
+            renderScrumBoard();
+            renderKanbanBoards();
+            
+            // Simulate bug finding
+            setTimeout(() => {
+                story.progress = 25;
+                renderScrumBoard();
+                addLog(`🔍 ${eng.name} found bug in ${story.file}:${story.bugLine}`, 'fa-bug');
+                
+                if (selectedEngineer === engineerId) {
+                    renderCodeEditor();
+                }
+                
+                // Simulate fixing with typing animation
+                setTimeout(() => {
+                    story.progress = 50;
+                    renderScrumBoard();
+                    
+                    const file = story.file;
+                    const oldContent = codeFiles[engineerId][file];
+                    const lines = oldContent.split('\n');
+                    const bugLineIndex = story.bugLine - 1;
+                    
+                    // Fix the bug
+                    if (story.id === 'ST-101') lines[bugLineIndex] = '      // FIXED: Added error handling\n      try { return await User.find(); } catch(e) { throw new Error("DB Error"); }';
+                    else if (story.id === 'ST-201') lines[bugLineIndex] = '    # FIXED: Used select_related to prevent N+1\n    user = User.objects.select_related().get(id=user_id)';
+                    else if (story.id === 'ST-301') lines[bugLineIndex] = '  // FIXED: Create new array instead of mutating\n  const sortedData = [...data].sort((a, b) => a.id - b.id);';
+                    else if (story.id === 'ST-401') lines[bugLineIndex] = '# FIXED: Multi-stage build\nFROM node:16 AS builder\nWORKDIR /app\nCOPY . .\nRUN npm run build\n\nFROM node:16-slim\nCOPY --from=builder /app/dist ./dist';
+                    else if (story.id === 'ST-501') lines[bugLineIndex] = '  // FIXED: Proper XSS sanitization\n  return input.replace(/[<>"\'&]/g, char => ({ "<": "&lt;", ">": "&gt;", \'"\': "&quot;", "\'": "&#39;", "&": "&amp;" }[char]));';
+                    else lines[bugLineIndex] = lines[bugLineIndex].replace('BUG', 'FIXED');
+                    
+                    const newContent = lines.join('\n');
+                    
+                    addLog(`🔧 ${eng.name} fixing bug with real-time typing...`, 'fa-keyboard');
+                    
+                    // Typing animation for fix
+                    simulateTyping(engineerId, file, newContent, () => {
+                        story.progress = 75;
+                        bugsFixedCount++;
+                        renderScrumBoard();
+                        addLog(`✅ ${eng.name} FIXED bug in ${story.file}`, 'fa-check');
+                        
+                        if (selectedEngineer === engineerId) {
+                            renderCodeEditor();
+                        }
+                        
+                        // Commit and push
+                        setTimeout(() => {
+                            const commitHash = Math.random().toString(36).substr(2, 7);
+                            todoTask.commitHash = commitHash;
+                            todoTask.prNumber = Math.floor(Math.random() * 500) + 100;
+                            
+                            addLog(`💾 ${eng.name} committed ${commitHash}`, 'fa-code-commit');
+                            
+                            setTimeout(() => {
+                                todoTask.status = 'review';
+                                story.status = 'review';
+                                story.progress = 90;
+                                addLog(`🔀 ${eng.name} created PR #${todoTask.prNumber}`, 'fa-code-pull-request');
+                                
+                                renderScrumBoard();
+                                renderKanbanBoards();
+                                
+                                // Auto-approve by Brijesh
+                                setTimeout(() => {
+                                    todoTask.status = 'done';
+                                    story.status = 'done';
+                                    story.progress = 100;
+                                    addLog(`✅ Brijesh APPROVED PR #${todoTask.prNumber} · ${story.id} DONE`, 'fa-check-circle');
+                                    
+                                    renderScrumBoard();
+                                    renderKanbanBoards();
+                                    updateStats();
+                                    
+                                    if (selectedEngineer === engineerId) {
+                                        renderCodeEditor();
+                                    }
+                                }, 2000);
+                            }, 1500);
+                        }, 1500);
+                    });
+                }, 2000);
+            }, 1500);
+        }
+
+        function simulationStep() {
+            if (!isRunning) return;
+            
+            // Assign any unassigned tasks
+            const unassigned = stories.filter(s => !s.assignee && s.status === 'backlog');
+            if (unassigned.length > 0) {
+                assignTasksByExpertise();
+            }
+            
+            // Process each engineer (all work simultaneously)
+            ENGINEERS.forEach(eng => {
+                const hasInProgress = engineerTasks[eng.id].some(t => t.status === 'in-progress');
+                const hasTodo = engineerTasks[eng.id].some(t => t.status === 'todo');
+                
+                if (!hasInProgress && hasTodo) {
+                    processEngineerTask(eng.id);
+                }
+            });
+        }
+
+        // ---------- CONTROLS ----------
+        function startSimulation() {
+            isRunning = true;
+            simulationInterval = setInterval(simulationStep, 3000);
+            document.getElementById('startSimulation').disabled = true;
+            document.getElementById('stopSimulation').disabled = false;
+            document.getElementById('simulationStatus').textContent = '🟢 All Engineers Working';
+            addLog('🤖 All 5 engineers working simultaneously on expertise-matched tasks', 'fa-play');
+            
+            // Initial assignment
+            assignTasksByExpertise();
+            
+            // Start all engineers immediately
+            ENGINEERS.forEach(eng => {
+                setTimeout(() => {
+                    if (isRunning) {
+                        const hasTodo = engineerTasks[eng.id].some(t => t.status === 'todo');
+                        const hasInProgress = engineerTasks[eng.id].some(t => t.status === 'in-progress');
+                        if (hasTodo && !hasInProgress) {
+                            processEngineerTask(eng.id);
+                        }
+                    }
+                }, ENGINEERS.indexOf(eng) * 500);
+            });
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            clearInterval(simulationInterval);
+            Object.values(typingTimeouts).forEach(clearInterval);
+            document.getElementById('startSimulation').disabled = false;
+            document.getElementById('stopSimulation').disabled = true;
+            document.getElementById('simulationStatus').textContent = '⏸️ Paused';
+            addLog('⏸️ Simulation paused', 'fa-pause');
+        }
+
+        function resetSimulation() {
+            stopSimulation();
+            
+            stories.forEach(s => {
+                s.assignee = null;
+                s.status = 'backlog';
+                s.progress = 0;
+            });
+            
+            ENGINEERS.forEach(e => {
+                engineerTasks[e.id] = [];
+                e.repo = null;
+            });
+            
+            bugsFixedCount = 0;
+            
+            // Reset code files to original with bugs
+            codeFiles.eng1 = {
+                'graphql/resolvers.js': `import { User } from '../models';\n\nexport const resolvers = {\n  Query: {\n    users: async () => {\n      // BUG: Missing error handling\n      return await User.find();\n    },\n    user: async (_, { id }) => {\n      return await User.findById(id);\n    }\n  }\n};`,
+                'services/userService.js': `export class UserService {\n  async getUsersWithPosts() {\n    // BUG: Inefficient $lookup\n    return await User.aggregate([\n      { $lookup: {\n        from: 'posts',\n        localField: '_id',\n        foreignField: 'userId',\n        as: 'posts'\n      }}\n    ]);\n  }\n}`,
+                'types/api.ts': `interface User {\n  id: string;\n  email: string;\n}\n\n// BUG: Missing proper typing\nexport type ApiResponse = {\n  data: any;\n};`
+            };
+            
+            document.getElementById('terminal').innerHTML = `
+                <div class="terminal-line">$ System reset · All 25 stories ready</div>
+                <div class="terminal-line">$ 5 engineers with specialized tech stacks</div>
+                <div class="terminal-line">$ Click Start to begin autonomous workflow</div>
+            `;
+            
+            renderScrumBoard();
+            renderKanbanBoards();
+            renderCodeEditor();
+            updateStats();
+            
+            addLog('🔄 Simulation reset · All engineers ready with 25 stories', 'fa-rotate-left');
+        }
+
+        // ---------- INITIALIZATION ----------
+        function initialize() {
+            renderEngineerSelector();
+            renderScrumBoard();
+            renderKanbanBoards();
+            updateStats();
+            
+            // Event listeners
+            document.getElementById('startSimulation').addEventListener('click', startSimulation);
+            document.getElementById('stopSimulation').addEventListener('click', stopSimulation);
+            document.getElementById('resetSimulation').addEventListener('click', resetSimulation);
+            
+            // Initial activity log
+            const container = document.getElementById('activityLog');
+            container.innerHTML = activityLogs.slice().reverse().map(log => `
+                <div class="log-entry">
+                    <span style="color: #60a5fa;">[${log.time}]</span>
+                    <span><i class="fas ${log.icon}"></i> ${log.message}</span>
+                </div>
+            `).join('');
+            
+            addLog('👥 Aarav(MERN) · Priya(Python) · Rohan(React) · Meera(DevOps) · Vikram(Security)', 'fa-users');
+            addLog('📊 25 stories distributed · 5 per engineer based on expertise', 'fa-chart-bar');
+        }
+
+        initialize();
+    })();
+</script>
+</body>
+</html>
