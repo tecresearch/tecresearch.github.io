@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatApp · Broadcast & PM</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #10131c 0%, #1a1f2e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 1300px;
+            max-width: 100%;
+            height: 850px;
+            max-height: 95vh;
+            background: #0e121c;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(75, 130, 255, 0.15);
+            display: flex;
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ----- SIDEBAR (USERS POPUP PANEL) ----- */
+        .users-sidebar {
+            width: 300px;
+            background: #151b26;
+            border-right: 1px solid #29303f;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 22px 18px 16px;
+            border-bottom: 1px solid #262f3f;
+        }
+
+        .sidebar-header h2 {
+            color: #eef2fb;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header h2 i {
+            color: #3b82f6;
+            font-size: 1.3rem;
+        }
+
+        .online-badge {
+            margin-top: 8px;
+            color: #8e9db5;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .online-badge .dot {
+            height: 10px;
+            width: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #10b98180;
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #3b4b62 #1e2632;
+        }
+
+        .users-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .users-list::-webkit-scrollbar-track {
+            background: #1e2632;
+            border-radius: 10px;
+        }
+
+        .users-list::-webkit-scrollbar-thumb {
+            background: #3b4b62;
+            border-radius: 10px;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            background: #1b2330;
+            border-radius: 18px;
+            border: 1px solid #28303f;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-card:hover {
+            background: #232d3e;
+            border-color: #3b82f6;
+            transform: translateX(2px);
+            box-shadow: 0 6px 12px -4px #0f172a;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: #1e2b41;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            color: #7aa2f7;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            border: 1.5px solid #2e405b;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            color: #f0f4ff;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .user-status {
+            font-size: 0.75rem;
+            color: #8b9fc9;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+        }
+
+        .pm-hint {
+            font-size: 0.7rem;
+            color: #5f7cac;
+            margin-left: 4px;
+        }
+
+        /* ----- MAIN CHAT AREA ----- */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f1620;
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 18px 28px;
+            background: #101924;
+            border-bottom: 1px solid #232e3f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-title i {
+            font-size: 1.7rem;
+            color: #3b82f6;
+        }
+
+        .chat-title h3 {
+            color: #dfe7f5;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .chat-title h3 span {
+            background: #1e2b41;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            margin-left: 12px;
+            color: #b0c8ff;
+            border: 1px solid #34548b;
+        }
+
+        .pm-indicator {
+            background: #1e2f48;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: #bdd3ff;
+            font-size: 0.9rem;
+            border: 1px solid #2f4b78;
+        }
+
+        .pm-indicator i {
+            margin-right: 6px;
+            color: #60a5fa;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #0b111c;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-broadcast {
+            align-self: flex-start;
+        }
+
+        .message-private {
+            align-self: flex-end;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 22px;
+            line-height: 1.45;
+            word-break: break-word;
+            box-shadow: 0 6px 10px -4px rgba(0,0,0,0.3);
+        }
+
+        .broadcast .message-bubble {
+            background: #1f2a3f;
+            color: #ecf2fc;
+            border-bottom-left-radius: 6px;
+            border: 1px solid #334十五;
+            border-color: #314a6a;
+        }
+
+        .private .message-bubble {
+            background: #1e3a5f;
+            color: #ffffff;
+            border-bottom-right-radius: 6px;
+            border: 1px solid #2f6eb0;
+            background: linear-gradient(145deg, #1f3b60, #15273f);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 0.7rem;
+            color: #98aecb;
+        }
+
+        .broadcast .message-meta {
+            margin-left: 8px;
+        }
+
+        .private .message-meta {
+            margin-right: 8px;
+            justify-content: flex-end;
+        }
+
+        .sender-name {
+            font-weight: 600;
+            color: #c6daff;
+        }
+
+        .private .sender-name {
+            color: #9bc0ff;
+        }
+
+        .tag {
+            background: #2f405b;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #b9d0fd;
+        }
+
+        .private-tag {
+            background: #1f4a7a;
+            color: white;
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 20px 28px;
+            background: #101924;
+            border-top: 1px solid #253040;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .message-input-wrapper {
+            flex: 1;
+            display: flex;
+            background: #1a2433;
+            border-radius: 48px;
+            border: 1px solid #314a67;
+            align-items: center;
+            padding: 4px 4px 4px 20px;
+            transition: 0.2s;
+        }
+
+        .message-input-wrapper:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+        }
+
+        .message-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 0;
+            color: #f0f6ff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .message-input::placeholder {
+            color: #7e95b5;
+            font-weight: 300;
+        }
+
+        .send-btn {
+            background: #2563eb;
+            border: none;
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: 0.15s;
+            box-shadow: 0 6px 12px #1e3a8a40;
+            margin-left: 4px;
+        }
+
+        .send-btn:hover {
+            background: #3b82f6;
+            transform: scale(1.02);
+        }
+
+        .broadcast-hint {
+            color: #869dbf;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        /* popup / active pm style */
+        .pm-active-highlight {
+            border-left: 4px solid #3b82f6;
+            background: #1e2b41;
+        }
+
+        .empty-chat-msg {
+            text-align: center;
+            color: #7c90ae;
+            margin-top: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- SIDEBAR: USERS LIST (like a popup panel always visible) -->
+    <div class="users-sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-users"></i> Online · 5</h2>
+            <div class="online-badge">
+                <span class="dot"></span> <span>All active · click to PM</span>
+            </div>
+        </div>
+        <div class="users-list" id="usersListContainer">
+            <!-- users injected from JS -->
+        </div>
+        <div style="padding: 16px; border-top: 1px solid #253040; color: #6f8db0; font-size: 0.8rem;">
+            <i class="fas fa-info-circle"></i> Click user → /pm auto‑fill
+        </div>
+    </div>
+
+    <!-- MAIN CHAT -->
+    <div class="chat-main">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comment-dots"></i>
+                <h3>Lobby <span id="chatContextLabel"># broadcast</span></h3>
+            </div>
+            <div class="pm-indicator" id="pmIndicator">
+                <i class="fas fa-globe"></i> <span id="pmTargetDisplay">Everyone (broadcast)</span>
+            </div>
+        </div>
+
+        <!-- Messages display -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="empty-chat-msg">
+                <i class="fas fa-message" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px; display: block;"></i>
+                Start chatting · type and press Enter / send
+            </div>
+        </div>
+
+        <!-- Input area with broadcast / PM hint -->
+        <div class="input-area">
+            <div class="message-input-wrapper">
+                <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." autocomplete="off">
+                <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <div style="padding: 6px 28px 14px; color: #6a85a8; font-size: 0.75rem; display: flex; gap: 18px;">
+            <span><i class="far fa-circle"></i> Broadcast: just type</span>
+            <span><i class="fas fa-user-lock"></i> PM: click user → /pm username auto</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        "use strict";
+
+        // ---------- DATA ----------
+        const currentUser = {
+            name: 'You',
+            avatarLetter: 'Y'
+        };
+
+        // Mock users (excluding 'You')
+        const users = [
+            { name: 'Alex', status: 'online', avatar: 'A' },
+            { name: 'Jordan', status: 'online', avatar: 'J' },
+            { name: 'Casey', status: 'online', avatar: 'C' },
+            { name: 'Riley', status: 'online', avatar: 'R' },
+            { name: 'Morgan', status: 'away', avatar: 'M' }
+        ];
+
+        // Message storage
+        let messages = [];
+
+        // Current PM recipient (null = broadcast)
+        let pmRecipient = null; 
+
+        // DOM elements
+        const usersContainer = document.getElementById('usersListContainer');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatContextLabel = document.getElementById('chatContextLabel');
+        const pmTargetDisplay = document.getElementById('pmTargetDisplay');
+
+        // Helper: update UI header based on pmRecipient
+        function updateHeaderAndIndicator() {
+            if (pmRecipient) {
+                chatContextLabel.textContent = `📩 /pm ${pmRecipient}`;
+                pmTargetDisplay.innerHTML = `<i class="fas fa-user-shield"></i> PM to ${pmRecipient}`;
+            } else {
+                chatContextLabel.textContent = `# broadcast`;
+                pmTargetDisplay.innerHTML = `<i class="fas fa-globe"></i> Everyone (broadcast)`;
+            }
+        }
+
+        // Render all messages
+        function renderMessages() {
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = `<div class="empty-chat-msg">
+                    <i class="fas fa-message" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px; display: block;"></i>
+                    No messages yet. Say hi!
+                </div>`;
+                return;
+            }
+
+            let html = '';
+            messages.forEach(msg => {
+                const isBroadcast = msg.type === 'broadcast';
+                const isPrivate = msg.type === 'private';
+                const messageClass = isBroadcast ? 'broadcast' : 'private';
+                const bubbleClass = isBroadcast ? 'broadcast' : 'private';
+                
+                // Determine if the current user is the sender (for styling right/left)
+                // In our model, private messages are always from 'You' to recipient, but we keep generic.
+                const senderIsYou = msg.sender === currentUser.name;
+                // For broadcast, align left; for private, align right (but we can customize)
+                const alignClass = isBroadcast ? 'message-broadcast' : 'message-private';
+                
+                let senderDisplay = '';
+                if (isBroadcast) {
+                    senderDisplay = `<span class="sender-name">${msg.sender}</span>`;
+                } else {
+                    // private: show "You → recipient" or "recipient → You" ? but our implementation only sends from You.
+                    if (msg.sender === currentUser.name) {
+                        senderDisplay = `<span class="sender-name">You → ${msg.recipient}</span>`;
+                    } else {
+                        senderDisplay = `<span class="sender-name">${msg.sender} → You</span>`;
+                    }
+                }
+
+                const tagHtml = isBroadcast ? 
+                    '<span class="tag"><i class="fas fa-bullhorn"></i> broadcast</span>' : 
+                    '<span class="tag private-tag"><i class="fas fa-lock"></i> private</span>';
+
+                html += `
+                    <div class="message ${messageClass} ${alignClass}">
+                        <div class="message-bubble">${escapeHtml(msg.text)}</div>
+                        <div class="message-meta">
+                            ${senderDisplay}
+                            ${tagHtml}
+                            <span>${msg.time}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            messagesContainer.innerHTML = html;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // simple escape
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Add a new message object and re-render
+        function addMessage(type, text, sender, recipient = null) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messages.push({
+                type: type,        // 'broadcast' or 'private'
+                text: text,
+                sender: sender,
+                recipient: recipient,
+                time: timeStr
+            });
+            renderMessages();
+        }
+
+        // Broadcast message
+        function sendBroadcastMessage(text) {
+            if (!text.trim()) return;
+            addMessage('broadcast', text.trim(), currentUser.name);
+        }
+
+        // Private message (always from current user to recipient)
+        function sendPrivateMessage(recipient, text) {
+            if (!text.trim()) return;
+            if (!recipient) {
+                alert('No recipient selected. Click a user first.');
+                return;
+            }
+            addMessage('private', text.trim(), currentUser.name, recipient);
+        }
+
+        // Process input: detects /pm or broadcast
+        function handleSendMessage() {
+            const rawText = messageInput.value.trim();
+            if (!rawText) return;
+
+            // check for /pm command: /pm username message...
+            const pmRegex = /^\/pm\s+(\S+)\s+(.+)$/i;
+            const match = rawText.match(pmRegex);
+            
+            if (match) {
+                const targetUser = match[1];
+                const pmContent = match[2];
+                // verify user exists (case-insensitive)
+                const userExists = users.some(u => u.name.toLowerCase() === targetUser.toLowerCase());
+                if (!userExists) {
+                    alert(`User "${targetUser}" not found.`);
+                    messageInput.value = '';
+                    return;
+                }
+                // Set pmRecipient to that user (exact case from users list)
+                const exactUser = users.find(u => u.name.toLowerCase() === targetUser.toLowerCase()).name;
+                pmRecipient = exactUser;
+                updateHeaderAndIndicator();
+                // highlight active user in sidebar
+                highlightActiveUser(pmRecipient);
+                // send private message
+                sendPrivateMessage(pmRecipient, pmContent);
+                messageInput.value = '';
+                // optional: keep pmRecipient set (sticky)
+            } else {
+                // If we have a pmRecipient set, treat as private message automatically
+                if (pmRecipient) {
+                    sendPrivateMessage(pmRecipient, rawText);
+                    messageInput.value = '';
+                    // keep pm recipient sticky
+                } else {
+                    // broadcast
+                    sendBroadcastMessage(rawText);
+                    messageInput.value = '';
+                }
+            }
+        }
+
+        // Highlight the active PM user in the sidebar
+        function highlightActiveUser(recipientName) {
+            document.querySelectorAll('.user-card').forEach(card => {
+                const nameSpan = card.querySelector('.user-name');
+                if (nameSpan && nameSpan.textContent === recipientName) {
+                    card.classList.add('pm-active-highlight');
+                } else {
+                    card.classList.remove('pm-active-highlight');
+                }
+            });
+        }
+
+        // Remove highlight if broadcast
+        function clearHighlight() {
+            document.querySelectorAll('.user-card').forEach(c => c.classList.remove('pm-active-highlight'));
+        }
+
+        // Render users sidebar
+        function renderUsersList() {
+            let usersHtml = '';
+            users.forEach(user => {
+                usersHtml += `
+                    <div class="user-card" data-username="${user.name}">
+                        <div class="user-avatar">${user.avatar}</div>
+                        <div class="user-info">
+                            <div class="user-name">${user.name}</div>
+                            <div class="user-status">
+                                <span class="status-dot" style="background: ${user.status === 'online' ? '#10b981' : '#f59e0b'};"></span>
+                                ${user.status} 
+                                <span class="pm-hint"><i class="fas fa-reply"></i> /pm</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            // Also add a "broadcast" card (optional) to reset PM
+            usersHtml += `
+                <div class="user-card" data-username="__broadcast__" style="background: #1f2a3c; border-color: #3a4e6b;">
+                    <div class="user-avatar" style="background: #253b53;"><i class="fas fa-globe"></i></div>
+                    <div class="user-info">
+                        <div class="user-name">📢 Everyone</div>
+                        <div class="user-status">broadcast mode</div>
+                    </div>
+                </div>
+            `;
+            usersContainer.innerHTML = usersHtml;
+
+            // Attach click listeners to user cards
+            document.querySelectorAll('.user-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const username = card.getAttribute('data-username');
+                    
+                    if (username === '__broadcast__') {
+                        // switch to broadcast
+                        pmRecipient = null;
+                        updateHeaderAndIndicator();
+                        clearHighlight();
+                        messageInput.placeholder = 'Type a message...';
+                        messageInput.value = ''; // don't auto insert /pm
+                        // remove any active highlight
+                    } else {
+                        // set PM recipient
+                        pmRecipient = username;
+                        updateHeaderAndIndicator();
+                        highlightActiveUser(username);
+                        // Auto-fill input with "/pm username " for convenience
+                        messageInput.value = `/pm ${username} `;
+                        messageInput.focus();
+                        // set cursor at end
+                        const len = messageInput.value.length;
+                        messageInput.setSelectionRange(len, len);
+                    }
+                });
+            });
+
+            // If pmRecipient already set, highlight it
+            if (pmRecipient) {
+                highlightActiveUser(pmRecipient);
+            }
+        }
+
+        // Initialize with some sample messages
+        function addSampleMessages() {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+            messages.push({
+                type: 'broadcast',
+                text: 'Welcome to the chat! 👋',
+                sender: 'System',
+                time: time
+            });
+            messages.push({
+                type: 'broadcast',
+                text: 'Click any user to send a private message. You can also type /pm username message.',
+                sender: 'Alex',
+                time: time
+            });
+            renderMessages();
+        }
+
+        // Reset to broadcast (used by clicking everyone card)
+        function switchToBroadcast() {
+            pmRecipient = null;
+            updateHeaderAndIndicator();
+            clearHighlight();
+            messageInput.placeholder = 'Type a message...';
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', () => {
+            handleSendMessage();
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+
+        // Manually handle clicking "Everyone" card (already handled via data-attr, but need to reset properly)
+        // We'll adjust the click handler above to reset.
+
+        // Additional: when input starts with /pm but user wants to override, fine.
+
+        // Initialize UI
+        function init() {
+            renderUsersList();
+            addSampleMessages();
+            updateHeaderAndIndicator();
+            messageInput.placeholder = 'Type a message...';
+        }
+
+        init();
+
+        // small improvement: if user manually deletes /pm, we might keep recipient.
+        // but we keep it sticky until changed by click.
+        // Also handle case when user manually clears input but we want broadcast?
+        // We'll keep as is. 
+        // Add a small reset for clarity: "Everyone" card sets pmRecipient=null.
+
+        // re-apply highlight if pmRecipient changes from elsewhere.
+        window.addEventListener('load', () => {
+            if (pmRecipient) highlightActiveUser(pmRecipient);
+        });
+
+        // Expose for debugging (optional)
+    })();
+</script>
+</body>
+</html>
