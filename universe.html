@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Multi-Universe | Planets • Galaxies • Infinite Zoom</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #000;
+    }
+    #info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 18px;
+      border-radius: 30px;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      letter-spacing: 1px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .zoom-hint {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 13px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      pointer-events: none;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">✨ MULTI-VERSE • scroll to zoom infinitely</div>
+  <div class="zoom-hint">🌀 wheel zoom • drag to look around</div>
+
+  <!-- Import maps and libraries -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    
+    // --- INITIALIZATION ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030311);
+    
+    // Camera: perspective, positioned to see the grand structure
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10000);
+    camera.position.set(0, 25, 60);
+    camera.lookAt(0, 0, 0);
+    
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // cap for performance
+    renderer.setClearColor(0x050510);
+    document.body.appendChild(renderer.domElement);
+    
+    // Controls with infinite zoom enabled
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.8;
+    controls.zoomSpeed = 2.5;
+    controls.panSpeed = 1.0;
+    controls.target.set(0, 0, 0);
+    controls.update();
+    
+    // Remove distance limits for infinite zoom
+    controls.minDistance = 0.001;
+    controls.maxDistance = 5000;
+    
+    // Post-processing for subtle glow
+    const renderScene = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0.2, 0.1);
+    bloomPass.threshold = 0.1;
+    bloomPass.strength = 0.8;
+    bloomPass.radius = 0.5;
+    
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+    
+    // --- LIGHTING (subtle, mostly emissive materials) ---
+    const ambientLight = new THREE.AmbientLight(0x222244);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    dirLight.position.set(10, 20, 5);
+    scene.add(dirLight);
+    
+    // --- STARFIELD BACKGROUND (particle system) ---
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsCount = 4000;
+    const starsPositions = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount * 3; i += 3) {
+      // Spread stars in a large sphere
+      const radius = 400 + Math.random() * 600;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      starsPositions[i] = Math.cos(theta) * Math.sin(phi) * radius;
+      starsPositions[i+1] = Math.sin(theta) * Math.sin(phi) * radius;
+      starsPositions[i+2] = Math.cos(phi) * radius;
+    }
+    starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+    const starsMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.7,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.9
+    });
+    const starsField = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(starsField);
+    
+    // Additional tiny distant stars (more static background)
+    const starsGeometry2 = new THREE.BufferGeometry();
+    const starsPositions2 = new Float32Array(2000 * 3);
+    for (let i = 0; i < 2000 * 3; i += 3) {
+      const radius = 700 + Math.random() * 800;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      starsPositions2[i] = Math.cos(theta) * Math.sin(phi) * radius;
+      starsPositions2[i+1] = Math.sin(theta) * Math.sin(phi) * radius;
+      starsPositions2[i+2] = Math.cos(phi) * radius;
+    }
+    starsGeometry2.setAttribute('position', new THREE.BufferAttribute(starsPositions2, 3));
+    const starsMaterial2 = new THREE.PointsMaterial({
+      color: 0xaaccff,
+      size: 1.2,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.7
+    });
+    const starsField2 = new THREE.Points(starsGeometry2, starsMaterial2);
+    scene.add(starsField2);
+    
+    // --- DATA STRUCTURES TO TRACK ORBITING BODIES ---
+    const systems = [];
+    
+    // Helper to create a circular orbit path (visual ring)
+    function createOrbitPath(radius, color = 0xffffff, opacity = 0.25) {
+      const points = [];
+      const segments = 128;
+      for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        points.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
+      }
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ 
+        color: color,
+        opacity: opacity,
+        transparent: true,
+        depthWrite: false
+      });
+      const orbitLine = new THREE.LineLoop(geometry, material);
+      return orbitLine;
+    }
+    
+    // Create a glowing sphere (planet, star, galaxy core)
+    function createCelestialBody(radius, color, emissiveIntensity = 0.9, textureDetail = false) {
+      const geometry = new THREE.SphereGeometry(radius, 64, 64);
+      const material = new THREE.MeshStandardMaterial({
+        color: color,
+        emissive: color,
+        emissiveIntensity: emissiveIntensity,
+        roughness: 0.3,
+        metalness: 0.1
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    }
+    
+    // Create a galaxy spiral (simple representation using particles rotating)
+    function createGalaxySpiral(radius, color1, color2, particleCount = 800) {
+      const group = new THREE.Group();
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      
+      const c1 = new THREE.Color(color1);
+      const c2 = new THREE.Color(color2);
+      
+      for (let i = 0; i < particleCount; i++) {
+        // Spiral shape: radius increases with angle, with some randomness
+        const angle = (i / particleCount) * Math.PI * 8; // multiple arms
+        const r = radius * (i / particleCount) * 0.9 + radius * 0.1;
+        const spiralFactor = 0.4;
+        const x = Math.cos(angle + r * 0.5) * r * (0.8 + Math.sin(angle * 2) * 0.2);
+        const z = Math.sin(angle + r * 0.5) * r * (0.8 + Math.cos(angle * 2) * 0.2);
+        const y = (Math.random() - 0.5) * radius * 0.25;
+        
+        positions[i * 3] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
+        
+        // Color gradient from center to edge
+        const mixColor = c1.clone().lerp(c2, i / particleCount);
+        colors[i * 3] = mixColor.r;
+        colors[i * 3 + 1] = mixColor.g;
+        colors[i * 3 + 2] = mixColor.b;
+      }
+      
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      
+      const material = new THREE.PointsMaterial({
+        size: 0.25,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.9
+      });
+      
+      const points = new THREE.Points(geometry, material);
+      group.add(points);
+      
+      // Add central glow
+      const coreGlow = createCelestialBody(radius * 0.25, color1, 1.2);
+      group.add(coreGlow);
+      
+      return group;
+    }
+    
+    // --- BUILD THE MULTIVERSE STRUCTURE ---
+    
+    // 1. META-GALAXY CLUSTER (outermost) - represented as large glowing orbs with orbits
+    const clusterGroup = new THREE.Group();
+    clusterGroup.name = "GalaxyCluster";
+    
+    // Create three large "galaxy superstructures" orbiting a central point
+    const galaxyCenters = [];
+    for (let i = 0; i < 3; i++) {
+      const angle = (i / 3) * Math.PI * 2;
+      const distance = 18;
+      const galaxyGroup = new THREE.Group();
+      galaxyGroup.position.set(Math.cos(angle) * distance, 0, Math.sin(angle) * distance);
+      
+      // Galaxy visual
+      const galaxyVis = createGalaxySpiral(3.5, 0xff88aa, 0x4466ff, 600);
+      galaxyGroup.add(galaxyVis);
+      
+      // Orbit path around cluster center (will be added to clusterGroup)
+      const orbitPath = createOrbitPath(distance, 0x88aaff, 0.2);
+      clusterGroup.add(orbitPath);
+      
+      // Store for animation
+      galaxyCenters.push({
+        group: galaxyGroup,
+        distance: distance,
+        angle: angle,
+        speed: 0.08 + Math.random() * 0.04
+      });
+      
+      clusterGroup.add(galaxyGroup);
+      
+      // --- Inside each galaxy: STAR SYSTEMS ---
+      const starSystemsGroup = new THREE.Group();
+      starSystemsGroup.name = "StarSystems";
+      galaxyGroup.add(starSystemsGroup);
+      
+      const starSystemData = [];
+      const numStars = 5;
+      for (let j = 0; j < numStars; j++) {
+        const starAngle = (j / numStars) * Math.PI * 2;
+        const starDist = 1.8 + Math.random() * 1.5;
+        const starGroup = new THREE.Group();
+        starGroup.position.set(Math.cos(starAngle) * starDist, 0, Math.sin(starAngle) * starDist);
+        
+        // Central star
+        const starColor = new THREE.Color().setHSL(0.1 + Math.random() * 0.2, 0.9, 0.6);
+        const star = createCelestialBody(0.4, starColor, 0.9);
+        starGroup.add(star);
+        
+        // Planets around this star
+        const planetData = [];
+        const numPlanets = 3 + Math.floor(Math.random() * 3);
+        for (let k = 0; k < numPlanets; k++) {
+          const planetOrbitRadius = 0.7 + k * 0.45;
+          const planetAngleOffset = Math.random() * Math.PI * 2;
+          const planetColor = new THREE.Color().setHSL(0.5 + Math.random() * 0.5, 0.8, 0.6);
+          const planetSize = 0.1 + Math.random() * 0.18;
+          
+          const planet = createCelestialBody(planetSize, planetColor, 0.7);
+          planet.position.set(Math.cos(planetAngleOffset) * planetOrbitRadius, 0, Math.sin(planetAngleOffset) * planetOrbitRadius);
+          starGroup.add(planet);
+          
+          // Orbit path for planet
+          const planetOrbitPath = createOrbitPath(planetOrbitRadius, planetColor, 0.35);
+          starGroup.add(planetOrbitPath);
+          
+          // Moon(s) for some planets
+          if (Math.random() > 0.4) {
+            const moonOrbitRadius = planetSize * 2.2;
+            const moonAngle = Math.random() * Math.PI * 2;
+            const moon = createCelestialBody(0.04, 0xcccccc, 0.5);
+            moon.position.set(
+              planet.position.x + Math.cos(moonAngle) * moonOrbitRadius,
+              0,
+              planet.position.z + Math.sin(moonAngle) * moonOrbitRadius
+            );
+            starGroup.add(moon);
+            
+            planetData.push({
+              planet: planet,
+              moon: moon,
+              orbitRadius: planetOrbitRadius,
+              moonOrbitRadius: moonOrbitRadius,
+              planetAngle: planetAngleOffset,
+              moonAngle: moonAngle,
+              planetSpeed: 0.8 + Math.random() * 0.7,
+              moonSpeed: 1.5 + Math.random() * 1.2
+            });
+          } else {
+            planetData.push({
+              planet: planet,
+              moon: null,
+              orbitRadius: planetOrbitRadius,
+              planetAngle: planetAngleOffset,
+              planetSpeed: 0.8 + Math.random() * 0.7
+            });
+          }
+        }
+        
+        // Orbit path for star around galaxy center
+        const starOrbitPath = createOrbitPath(starDist, 0xffffff, 0.15);
+        starSystemsGroup.add(starOrbitPath);
+        
+        starSystemData.push({
+          group: starGroup,
+          distance: starDist,
+          angle: starAngle,
+          speed: 0.15 + Math.random() * 0.2,
+          planets: planetData
+        });
+        
+        starSystemsGroup.add(starGroup);
+      }
+      
+      // Store star system data inside galaxy
+      galaxyGroup.userData = { starSystems: starSystemData };
+    }
+    
+    scene.add(clusterGroup);
+    
+    // Add a central supermassive core for the cluster
+    const clusterCore = createCelestialBody(1.8, 0xffaa44, 1.5);
+    clusterCore.position.set(0, 0, 0);
+    clusterGroup.add(clusterCore);
+    
+    // Additional faint orbits for cluster
+    for (let i = 0; i < 2; i++) {
+      const r = 22 + i * 5;
+      const orbit = createOrbitPath(r, 0x446688, 0.15);
+      clusterGroup.add(orbit);
+    }
+    
+    // Store animation data globally
+    const animationData = {
+      galaxyCenters: galaxyCenters,
+      clusterGroup: clusterGroup,
+      starsField: starsField,
+      starsField2: starsField2
+    };
+    
+    // --- ANIMATION LOOP ---
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      const time = performance.now() * 0.001; // seconds
+      
+      // Rotate galaxy centers around cluster core
+      animationData.galaxyCenters.forEach((item) => {
+        item.angle += item.speed * 0.008;
+        item.group.position.x = Math.cos(item.angle) * item.distance;
+        item.group.position.z = Math.sin(item.angle) * item.distance;
+        // Slowly rotate the galaxy group itself
+        item.group.rotation.y += 0.002;
+        
+        // Animate star systems inside each galaxy
+        if (item.group.userData && item.group.userData.starSystems) {
+          item.group.userData.starSystems.forEach(starSys => {
+            starSys.angle += starSys.speed * 0.01;
+            starSys.group.position.x = Math.cos(starSys.angle) * starSys.distance;
+            starSys.group.position.z = Math.sin(starSys.angle) * starSys.distance;
+            starSys.group.rotation.y += 0.005;
+            
+            // Animate planets and moons
+            starSys.planets.forEach(pData => {
+              pData.planetAngle += pData.planetSpeed * 0.015;
+              pData.planet.position.x = Math.cos(pData.planetAngle) * pData.orbitRadius;
+              pData.planet.position.z = Math.sin(pData.planetAngle) * pData.orbitRadius;
+              
+              if (pData.moon) {
+                pData.moonAngle += pData.moonSpeed * 0.02;
+                const moonOrbitX = Math.cos(pData.moonAngle) * pData.moonOrbitRadius;
+                const moonOrbitZ = Math.sin(pData.moonAngle) * pData.moonOrbitRadius;
+                pData.moon.position.x = pData.planet.position.x + moonOrbitX;
+                pData.moon.position.z = pData.planet.position.z + moonOrbitZ;
+              }
+            });
+          });
+        }
+      });
+      
+      // Rotate starfields slowly for immersive effect
+      animationData.starsField.rotation.y += 0.0001;
+      animationData.starsField.rotation.x += 0.00005;
+      animationData.starsField2.rotation.y -= 0.00008;
+      animationData.starsField2.rotation.z += 0.00003;
+      
+      // Update controls (infinite zoom is handled by OrbitControls with no distance limits)
+      controls.update();
+      
+      // Render via composer for bloom effect
+      composer.render();
+    }
+    
+    animate();
+    
+    // --- WINDOW RESIZE HANDLER ---
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // Initial console hint
+    console.log('🌌 Multi-Universe ready! Scroll to zoom infinitely through galaxies, stars, and planets.');
+    
+  </script>
+</body>
+</html>
